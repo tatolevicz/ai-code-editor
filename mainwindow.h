@@ -2,14 +2,12 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "views/CodeEditor.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
-namespace mg{
-    class MagiaEditorWidget;
-}
 
 class MainWindow : public QMainWindow
 {
@@ -21,7 +19,7 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    mg::MagiaEditorWidget* _editor{nullptr};
+    aic::CodeEditor* _editor{nullptr};
 
 };
 #endif // MAINWINDOW_H
