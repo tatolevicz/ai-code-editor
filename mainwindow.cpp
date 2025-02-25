@@ -16,6 +16,11 @@ MainWindow::MainWindow(QWidget *parent)
     _mainLayout->setContentsMargins(0, 0, 0, 0);
     _mainLayout->setSpacing(0);
     
+    // Create vertical layout for editor and terminal
+    _editorLayout = new QVBoxLayout();
+    _editorLayout->setContentsMargins(0, 0, 0, 0);
+    _editorLayout->setSpacing(0);
+    
     // Create and setup file explorer
     _fileExplorer = new FileExplorerWidget(_centralWidget);
     _mainLayout->addWidget(_fileExplorer);
@@ -26,7 +31,13 @@ MainWindow::MainWindow(QWidget *parent)
     
     // Create and setup code editor
     _editor = new aic::CodeEditor(_centralWidget);
-    _mainLayout->addWidget(_editor->getCentralWidget());
+    _editorLayout->addWidget(_editor->getCentralWidget(), 7); // 70% of space
+    
+    // Setup terminal
+    setupTerminal();
+    
+    // Add editor layout to main layout
+    _mainLayout->addLayout(_editorLayout, 1);
     
     // Create and setup AI chat widget
     _aiChat = new AIChatWidget(_centralWidget);
@@ -40,6 +51,16 @@ MainWindow::MainWindow(QWidget *parent)
     
     // Setup actions and shortcuts
     setupActions();
+}
+
+void MainWindow::setupTerminal()
+{
+    _terminal = new QTermWidget(0, _centralWidget);
+    _terminal->setColorScheme("Solarized");
+    _terminal->setTerminalFont(QFont("Monospace", 10));
+    _terminal->setScrollBarPosition(QTermWidget::ScrollBarRight);
+    _terminal->setWorkingDirectory(QDir::currentPath());
+    _editorLayout->addWidget(_terminal, 3); // 30% of space
 }
 
 void MainWindow::setupActions()
@@ -56,9 +77,16 @@ void MainWindow::setupActions()
     _toggleFileExplorerAction->setStatusTip("Show/Hide File Explorer");
     connect(_toggleFileExplorerAction, &QAction::triggered, this, &MainWindow::toggleFileExplorer);
     
+    // Create toggle action for Terminal
+    _toggleTerminalAction = new QAction("Toggle Terminal", this);
+    _toggleTerminalAction->setShortcut(QKeySequence("Ctrl+`"));
+    _toggleTerminalAction->setStatusTip("Show/Hide Terminal");
+    connect(_toggleTerminalAction, &QAction::triggered, this, &MainWindow::toggleTerminal);
+    
     // Add actions to window
     addAction(_toggleAIChatAction);
     addAction(_toggleFileExplorerAction);
+    addAction(_toggleTerminalAction);
 }
 
 void MainWindow::toggleAIChatWidget()
@@ -72,6 +100,13 @@ void MainWindow::toggleFileExplorer()
 {
     if (_fileExplorer) {
         _fileExplorer->setVisible(!_fileExplorer->isVisible());
+    }
+}
+
+void MainWindow::toggleTerminal()
+{
+    if (_terminal) {
+        _terminal->setVisible(!_terminal->isVisible());
     }
 }
 

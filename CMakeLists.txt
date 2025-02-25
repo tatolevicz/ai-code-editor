@@ -18,6 +18,9 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
         Svg
 )
 
+# Add QTermWidget
+find_package(qtermwidget6 REQUIRED)
+
 set(PROJECT_SOURCES
         # Dont forget to add this to see the icons on editor
         MagiaEditor/EditorRes.qrc
@@ -68,6 +71,7 @@ target_link_libraries(${PROJECT_NAME}
     Qt${QT_VERSION_MAJOR}::Svg
     mg_editor
     AIStreamer
+    qtermwidget6
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
