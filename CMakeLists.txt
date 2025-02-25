@@ -27,7 +27,7 @@ set(PROJECT_SOURCES
         mainwindow.ui
     views/CodeEditor.h
     views/App.h
-    views/GenericEditor.h)
+    views/GenericEditor.h views/AIChatWidget.h)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(${PROJECT_NAME}
