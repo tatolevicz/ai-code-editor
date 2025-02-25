@@ -7,17 +7,25 @@
 #include <QTextEdit>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QTimer>
+#include <QMetaObject>
 #include "MgStyles.h"
+
+#include <AIStreamer.h>
+#include <AgentProcessor.h>
 
 class AIChatWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit AIChatWidget(QWidget *parent = nullptr) : QWidget(parent)
+    explicit AIChatWidget(QWidget *parent = nullptr) : QWidget(parent),
+        _streamer(std::make_shared<ais::AIStreamer>()),
+        _processor(std::make_shared<ais::AgentProcessor>())
     {
         setFixedWidth(400);
         setupUI();
+        setupAI();
     }
 
 private:
@@ -25,6 +33,47 @@ private:
     QLineEdit *promptInput;
     QPushButton *sendButton;
     QPushButton *closeButton;
+    
+    // AI Components
+    std::shared_ptr<ais::AIStreamer> _streamer;
+    std::shared_ptr<ais::AgentProcessor> _processor;
+    bool _isProcessing{false};
+    QTimer _processingTimer;
+
+    void setupAI()
+    {
+        _streamer->setOnStart([this]() {
+            QMetaObject::invokeMethod(this, [this]() {
+                _isProcessing = true;
+                sendButton->setEnabled(false);
+                promptInput->setEnabled(false);
+            }, Qt::QueuedConnection);
+        });
+
+        _streamer->setOnUpdate([this](const std::string &update) {
+            QMetaObject::invokeMethod(this, [this, update]() {
+                responseArea->insertPlainText(QString::fromStdString(update));
+                _processor->process(update);
+            }, Qt::QueuedConnection);
+        });
+
+        _streamer->setOnFinish([this](const std::string& answer) {
+            QMetaObject::invokeMethod(this, [this]() {
+                _isProcessing = false;
+                sendButton->setEnabled(true);
+                promptInput->setEnabled(true);
+                responseArea->append("\n"); // Add a line break for the next message
+            }, Qt::QueuedConnection);
+        });
+
+        // Timer para verificar se podemos enviar nova mensagem
+        _processingTimer.setInterval(100); // 100ms
+        connect(&_processingTimer, &QTimer::timeout, this, [this]() {
+            sendButton->setEnabled(!_isProcessing);
+            promptInput->setEnabled(!_isProcessing);
+        });
+        _processingTimer.start();
+    }
 
     void setupUI()
     {
@@ -103,9 +152,14 @@ private slots:
     void onSendClicked()
     {
         QString prompt = promptInput->text();
-        if (!prompt.isEmpty()) {
+        if (!prompt.isEmpty() && !_isProcessing) {
             responseArea->append("<b>You:</b> " + prompt);
+            responseArea->append("<b>AI:</b> ");
             promptInput->clear();
+            
+            // Chama o streamer com a mensagem do usuário
+            _streamer->call(prompt.toStdString());
+            
             emit promptSubmitted(prompt);
         }
     }

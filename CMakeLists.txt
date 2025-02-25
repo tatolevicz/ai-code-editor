@@ -55,7 +55,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 # This policy is needed to link the qt libraries to the editor
 cmake_policy(SET CMP0079 NEW)
-target_link_libraries(mg_editor PUBLIC
+target_link_libraries(mg_editor PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Svg
     AIStreamer
@@ -63,7 +63,7 @@ target_link_libraries(mg_editor PUBLIC
 #--------------------------------------------------------------
 
 target_link_libraries(${PROJECT_NAME}
-    PUBLIC
+    PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Svg
     mg_editor
