@@ -90,5 +90,5 @@ void MainWindow::handleAIPrompt(const QString& prompt)
 {
     // TODO: Implement AI response handling here
     // For demonstration, we'll echo the prompt back
-    _aiChat->findChild<QTextEdit*>()->append("<b>AI:</b> Processing: " + prompt);
+//    _aiChat->findChild<QTextEdit*>()->append("<b>AI:</b> Processing: " + prompt);
 }
