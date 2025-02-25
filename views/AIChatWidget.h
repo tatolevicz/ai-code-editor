@@ -64,8 +64,11 @@ private:
             }, Qt::QueuedConnection);
         });
 
-        _streamer->setOnFinish([this](const std::string& answer) {
-            QMetaObject::invokeMethod(this, [this]() {
+        _streamer->setOnFinish([this](const std::string& answer)
+        {
+          _agent->addAssistantMessage(answer);
+            QMetaObject::invokeMethod(this, [this]()
+            {
                 _isProcessing = false;
                 sendButton->setEnabled(true);
                 promptInput->setEnabled(true);
