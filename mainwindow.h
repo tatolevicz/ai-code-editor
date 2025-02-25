@@ -9,18 +9,21 @@
 #include "views/CodeEditor.h"
 #include "views/AIChatWidget.h"
 #include "views/FileExplorerWidget.h"
+#include "ais/include/AgentProcessor.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
-class MainWindow : public QMainWindow
+class MainWindow : public QMainWindow, public ais::CommandExecutor
 {
     Q_OBJECT
 
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+    void executeTerminalCommand(const std::string &command) override;
 
 private:
     void setupActions();
@@ -45,5 +48,6 @@ private:
     QAction* _toggleAIChatAction{nullptr};
     QAction* _toggleFileExplorerAction{nullptr};
     QAction* _toggleTerminalAction{nullptr};
+    ais::AgentProcessor* _agentProcessor{nullptr};
 };
 #endif // MAINWINDOW_H

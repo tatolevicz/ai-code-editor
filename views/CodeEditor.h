@@ -67,6 +67,7 @@ namespace aic
         QString content = in.readAll();
         file.close();
         _editor->setText(content.toUtf8().constData());
+        _editor->setLexerForFile(filePath);  // Set the appropriate lexer based on file extension
         _currentFilePath = filePath;
       }
     }

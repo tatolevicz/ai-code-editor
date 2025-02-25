@@ -41,7 +41,7 @@ MainWindow::MainWindow(QWidget *parent)
     _mainLayout->addLayout(_editorLayout, 1);
     
     // Create and setup AI chat widget
-    _aiChat = new AIChatWidget(_centralWidget);
+    _aiChat = new AIChatWidget(_centralWidget, this);
     _mainLayout->addWidget(_aiChat);
     
     // Connect signals
@@ -52,6 +52,9 @@ MainWindow::MainWindow(QWidget *parent)
     
     // Setup actions and shortcuts
     setupActions();
+    
+    // Inicializa o AgentProcessor com este MainWindow como CommandExecutor
+    _agentProcessor = new ais::AgentProcessor(this);
 }
 
 void MainWindow::setupTerminal()
@@ -160,6 +163,7 @@ void MainWindow::handleFileSelected(const QString& filePath)
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete _agentProcessor; // Liberar a memória do AgentProcessor
 }
 
 void MainWindow::handleAIPrompt(const QString& prompt)
@@ -167,4 +171,19 @@ void MainWindow::handleAIPrompt(const QString& prompt)
     // TODO: Implement AI response handling here
     // For demonstration, we'll echo the prompt back
 //    _aiChat->findChild<QTextEdit*>()->append("<b>AI:</b> Processing: " + prompt);
+}
+
+// Implementação do método executeTerminalCommand da interface CommandExecutor
+void MainWindow::executeTerminalCommand(const std::string &command)
+{
+    if (_terminal) {
+        // Converte a string de std::string para QString
+        QString qCommand = QString::fromStdString(command);
+        
+        // Adiciona uma nova linha para executar o comando quando pressionado Enter
+        qCommand += "\n";
+        
+        // Envia o comando para o terminal
+        _terminal->sendText(qCommand);
+    }
 }

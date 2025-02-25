@@ -15,7 +15,7 @@
 #include <regex>
 #include "MagiaDebugger.h"
 #include "lua.hpp"
-
+#include <QFileInfo>
 
 namespace aic
 {
@@ -31,6 +31,10 @@ namespace aic
 
     void setup()
     {
+      this->resize(QSize(this->width(), this->height()));
+      this->setWrapMode(SC_WRAP_WORD);
+      setupDefaultStyle();
+
       auto lexNum = GetLexerCount();
       qDebug() << "Num of lexers: " << lexNum;
 
@@ -40,21 +44,6 @@ namespace aic
         qDebug() << "Lexer available: " << name;
       }
 
-      auto lex = CreateLexer("lua");
-
-      assert(lex != nullptr);
-
-      this->resize(QSize(this->width(), this->height()));
-      this->setWrapMode(SC_WRAP_WORD);
-
-      this->setILexer((sptr_t)(void*)lex);
-
-      mg::styles::editor::setDefaultStyle(this);
-      mg::styles::lua::setDefaultStyle(this);
-
-      this->autoCSetMaxWidth(50);
-      this->autoCSetMaxHeight(10);
-
       // Conectar sinais e slots para eventos de digitação
       connect(this, &ScintillaEdit::charAdded, this, &GenericEditor::onCharAdded);
       connect(this, &ScintillaEdit::modified, this, &GenericEditor::scriptModified);
@@ -63,6 +52,66 @@ namespace aic
       connect(this, &ScintillaEdit::dwellEnd, this, &GenericEditor::idleMouseEnd);
 
       this->setMouseDwellTime(500);
+
+      mg::styles::editor::setDefaultStyle(this);
+      mg::styles::lua::setDefaultStyle(this);
+
+      this->autoCSetMaxWidth(50);
+      this->autoCSetMaxHeight(10);
+    }
+
+    void setupDefaultStyle() 
+    {
+      // Set default style
+      styleSetFont(STYLE_DEFAULT, "Courier New");
+      styleSetSize(STYLE_DEFAULT, 10);
+      styleSetFore(STYLE_DEFAULT, 0x000000);
+      styleSetBack(STYLE_DEFAULT, 0xFFFFFF);
+      
+      // Apply the default style to all
+      styleClearAll();
+    }
+
+    void setLexerForFile(const QString& filePath) 
+    {
+      QString extension = QFileInfo(filePath).suffix().toLower();
+      
+      // Create appropriate lexer based on file extension
+      sptr_t lex = 0;
+      
+      if (extension == "lua") {
+        lex = (sptr_t)(void*)CreateLexer("lua");
+      }
+      else if (extension == "py" || extension == "python") {
+        lex = (sptr_t)(void*)CreateLexer("python");
+      }
+      else if (extension == "cpp" || extension == "h" || extension == "hpp" || extension == "cxx") {
+        lex = (sptr_t)(void*)CreateLexer("cpp");
+      }
+      else if (extension == "js" || extension == "javascript") {
+        lex = (sptr_t)(void*)CreateLexer("javascript");
+      }
+      else if (extension == "html" || extension == "htm") {
+        lex = (sptr_t)(void*)CreateLexer("html");
+      }
+      else if (extension == "css") {
+        lex = (sptr_t)(void*)CreateLexer("css");
+      }
+      else if (extension == "json") {
+        lex = (sptr_t)(void*)CreateLexer("json");
+      }
+      else if (extension == "xml") {
+        lex = (sptr_t)(void*)CreateLexer("xml");
+      }
+      else {
+        // Default to a simple text lexer if no specific lexer is available
+        lex = (sptr_t)(void*)CreateLexer("null");
+      }
+
+      if (lex) {
+        setILexer(lex);
+        colourise(0, -1);  // Apply syntax highlighting to the entire document
+      }
     }
 
     virtual ~GenericEditor(){}
@@ -130,12 +179,12 @@ namespace aic
 
     void idleMouseStart(int x, int y)
     {
-      qDebug() << "Mouse Idle start!";
+//      qDebug() << "Mouse Idle start!";
     }
 
     void idleMouseEnd(int x, int y)
     {
-      qDebug() << "Mouse Idle end!";
+//      qDebug() << "Mouse Idle end!";
 
     }
   };
