@@ -41,7 +41,7 @@ MainWindow::MainWindow(QWidget *parent)
     _mainLayout->addLayout(_editorLayout, 1);
     
     // Create and setup AI chat widget
-    _aiChat = new AIChatWidget(_centralWidget);
+    _aiChat = new AIChatWidget(_centralWidget, this);
     _mainLayout->addWidget(_aiChat);
     
     // Connect signals

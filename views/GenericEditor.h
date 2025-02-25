@@ -179,12 +179,12 @@ namespace aic
 
     void idleMouseStart(int x, int y)
     {
-      qDebug() << "Mouse Idle start!";
+//      qDebug() << "Mouse Idle start!";
     }
 
     void idleMouseEnd(int x, int y)
     {
-      qDebug() << "Mouse Idle end!";
+//      qDebug() << "Mouse Idle end!";
 
     }
   };
