@@ -45,6 +45,7 @@ else()
 endif()
 
 add_subdirectory(MagiaEditor)
+add_subdirectory(ais)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
     MagiaEditor/include
@@ -55,6 +56,7 @@ cmake_policy(SET CMP0079 NEW)
 target_link_libraries(mg_editor PUBLIC
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Svg
+    AIStreamer
 )
 #--------------------------------------------------------------
 
@@ -63,6 +65,7 @@ target_link_libraries(${PROJECT_NAME}
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Svg
     mg_editor
+    AIStreamer
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

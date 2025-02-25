@@ -1,0 +1,3 @@
+[submodule "ais"]
+	path = ais
+	url = git@github.com:tatolevicz/ais.git
