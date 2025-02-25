@@ -11,6 +11,9 @@
 #include <QMenu>
 #include <QAction>
 #include <QLabel>
+#include <QInputDialog>
+#include <QMessageBox>
+#include <QFileInfo>
 
 class FileExplorerWidget : public QWidget
 {
@@ -100,6 +103,102 @@ private:
         setLayout(mainLayout);
     }
 
+    QString getCurrentPath() const
+    {
+        QModelIndex index = _treeView->currentIndex();
+        if (index.isValid()) {
+            return _fileModel->filePath(index);
+        }
+        return _currentPath;
+    }
+
+    void createNewFile(const QString& parentPath)
+    {
+        bool ok;
+        QString fileName = QInputDialog::getText(this, "New File",
+                                               "Enter file name:", QLineEdit::Normal,
+                                               "new_file.txt", &ok);
+        if (ok && !fileName.isEmpty()) {
+            QString filePath = QDir(parentPath).filePath(fileName);
+            QFile file(filePath);
+            if (file.exists()) {
+                QMessageBox::warning(this, "Error", "File already exists!");
+                return;
+            }
+            if (file.open(QIODevice::WriteOnly)) {
+                file.close();
+                emit fileCreated(filePath);
+            } else {
+                QMessageBox::warning(this, "Error", "Failed to create file!");
+            }
+        }
+    }
+
+    void createNewFolder(const QString& parentPath)
+    {
+        bool ok;
+        QString folderName = QInputDialog::getText(this, "New Folder",
+                                                 "Enter folder name:", QLineEdit::Normal,
+                                                 "new_folder", &ok);
+        if (ok && !folderName.isEmpty()) {
+            QDir dir(parentPath);
+            if (!dir.mkdir(folderName)) {
+                QMessageBox::warning(this, "Error", "Failed to create folder!");
+            }
+        }
+    }
+
+    void deleteItem(const QString& path)
+    {
+        QFileInfo fileInfo(path);
+        QString itemType = fileInfo.isDir() ? "folder" : "file";
+        
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "Confirm Delete",
+                                    QString("Are you sure you want to delete this %1?\n%2")
+                                        .arg(itemType)
+                                        .arg(fileInfo.fileName()),
+                                    QMessageBox::Yes|QMessageBox::No);
+        
+        if (reply == QMessageBox::Yes) {
+            bool success;
+            if (fileInfo.isDir()) {
+                QDir dir(path);
+                success = dir.removeRecursively();
+            } else {
+                QFile file(path);
+                success = file.remove();
+            }
+            
+            if (!success) {
+                QMessageBox::warning(this, "Error", 
+                                   QString("Failed to delete %1!").arg(itemType));
+            }
+        }
+    }
+
+    void renameItem(const QString& oldPath)
+    {
+        QFileInfo fileInfo(oldPath);
+        bool ok;
+        QString newName = QInputDialog::getText(this, "Rename",
+                                              "Enter new name:", QLineEdit::Normal,
+                                              fileInfo.fileName(), &ok);
+        if (ok && !newName.isEmpty()) {
+            QFile file(oldPath);
+            QString newPath = QDir(fileInfo.path()).filePath(newName);
+            
+            if (QFile::exists(newPath)) {
+                QMessageBox::warning(this, "Error", "A file with that name already exists!");
+                return;
+            }
+            
+            if (!file.rename(newPath)) {
+                QMessageBox::warning(this, "Error", "Failed to rename file!");
+            }
+        }
+    }
+
 private slots:
     void onItemDoubleClicked(const QModelIndex &index)
     {
@@ -111,7 +210,7 @@ private slots:
 
     void onNewFileClicked()
     {
-        // TODO: Implement new file dialog
+        createNewFile(getCurrentPath());
     }
 
     void onRefreshClicked()
@@ -124,30 +223,57 @@ private slots:
     void showContextMenu(const QPoint &pos)
     {
         QMenu contextMenu(this);
+        QString currentPath = getCurrentPath();
+        QFileInfo fileInfo(currentPath);
+
+       _newFile = new QAction("New File", this);
+       _newFolder  = new QAction("New Folder", this);
+       _deleteItem = new QAction("Delete", this);
+       _renameItem = new QAction("Rename", this);
         
-        QAction newFile("New File", this);
-        QAction newFolder("New Folder", this);
-        QAction deleteItem("Delete", this);
-        QAction renameItem("Rename", this);
+        connect(_newFile, &QAction::triggered, [this, currentPath]() {
+            createNewFile(currentPath);
+        });
         
-        contextMenu.addAction(&newFile);
-        contextMenu.addAction(&newFolder);
+        connect(_newFolder, &QAction::triggered, [this, currentPath]() {
+            createNewFolder(currentPath);
+        });
+        
+        connect(_deleteItem, &QAction::triggered, [this, currentPath]() {
+            deleteItem(currentPath);
+        });
+        
+        connect(_renameItem, &QAction::triggered, [this, currentPath]() {
+            renameItem(currentPath);
+        });
+        
+        contextMenu.addAction(_newFile);
+        contextMenu.addAction(_newFolder);
         contextMenu.addSeparator();
-        contextMenu.addAction(&deleteItem);
-        contextMenu.addAction(&renameItem);
         
-        // TODO: Connect actions to appropriate slots
+        // Only show delete and rename if an item is selected
+        QModelIndex index = _treeView->currentIndex();
+        if (index.isValid()) {
+            contextMenu.addAction(_deleteItem);
+            contextMenu.addAction(_renameItem);
+        }
         
         contextMenu.exec(_treeView->mapToGlobal(pos));
     }
 
 signals:
     void fileSelected(const QString &filePath);
+    void fileCreated(const QString &filePath);
 
 private:
     QTreeView *_treeView{nullptr};
     QFileSystemModel *_fileModel{nullptr};
     QString _currentPath;
+    QAction* _newFile;
+    QAction* _newFolder;
+    QAction* _deleteItem;
+    QAction* _renameItem;
+
 };
 
 #endif // FILEEXPLORERWIDGET_H
