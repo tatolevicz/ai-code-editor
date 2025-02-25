@@ -7,6 +7,7 @@
 #include <QTextEdit>
 #include <QLineEdit>
 #include <QPushButton>
+#include "MgStyles.h"
 
 class AIChatWidget : public QWidget
 {
@@ -34,14 +35,17 @@ private:
         auto headerLayout = new QHBoxLayout();
         headerLayout->setContentsMargins(4, 4, 4, 4);
         
+        // Set widget background color
+        setStyleSheet(QString("AIChatWidget { background-color: #%1; }").arg(mg::styles::LuaEditorColors::DARK_BACKGROUND, 6, 16, QChar('0')));
+        
         // Spacer to push close button to the right
         headerLayout->addStretch();
         
         // Close button setup
         closeButton = new QPushButton("×", this);
         closeButton->setFixedSize(20, 20);
-        closeButton->setStyleSheet("QPushButton { border: none; border-radius: 10px; background-color: #ff6b6b; color: white; font-weight: bold; }"
-                                 "QPushButton:hover { background-color: #ff4444; }");
+        closeButton->setStyleSheet("QPushButton { border: none; border-radius: 10px; background-color: #B46981; color: white; font-weight: bold; }"
+                                 "QPushButton:hover { background-color: #D98E6C; }");
         headerLayout->addWidget(closeButton);
         mainLayout->addLayout(headerLayout);
         
@@ -53,18 +57,31 @@ private:
         responseArea = new QTextEdit(this);
         responseArea->setReadOnly(true);
         responseArea->setPlaceholderText("AI responses will appear here...");
-        responseArea->setStyleSheet("QTextEdit { background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; padding: 8px; }");
+        responseArea->setStyleSheet(QString("QTextEdit { background-color: #%1; color: #%2; border: 1px solid #%3; border-radius: 4px; padding: 8px; }"
+                                          "QTextEdit::placeholder { color: #%4; }")
+                                          .arg(mg::styles::LuaEditorColors::BACKGROUND, 6, 16, QChar('0'))
+                                          .arg(mg::styles::LuaEditorColors::IDENTIFIER, 6, 16, QChar('0'))
+                                          .arg(mg::styles::LuaEditorColors::OPERATOR, 6, 16, QChar('0'))
+                                          .arg(mg::styles::LuaEditorColors::COMMENT, 6, 16, QChar('0')));
         contentLayout->addWidget(responseArea);
 
         // Prompt input setup
         promptInput = new QLineEdit(this);
         promptInput->setPlaceholderText("Type your prompt here...");
-        promptInput->setStyleSheet("QLineEdit { padding: 8px; border: 1px solid #ddd; border-radius: 4px; }");
+        promptInput->setStyleSheet(QString("QLineEdit { padding: 8px; background-color: #%1; color: #%2; border: 1px solid #%3; border-radius: 4px; }"
+                                         "QLineEdit::placeholder { color: #%4; }")
+                                         .arg(mg::styles::LuaEditorColors::BACKGROUND, 6, 16, QChar('0'))
+                                         .arg(mg::styles::LuaEditorColors::IDENTIFIER, 6, 16, QChar('0'))
+                                         .arg(mg::styles::LuaEditorColors::OPERATOR, 6, 16, QChar('0'))
+                                         .arg(mg::styles::LuaEditorColors::COMMENT, 6, 16, QChar('0')));
         
         // Send button setup
         sendButton = new QPushButton("Send", this);
-        sendButton->setStyleSheet("QPushButton { padding: 8px 16px; background-color: #007bff; color: white; border: none; border-radius: 4px; }"
-                                "QPushButton:hover { background-color: #0056b3; }");
+        sendButton->setStyleSheet(QString("QPushButton { padding: 8px 16px; background-color: #%1; color: #%2; border: none; border-radius: 4px; }"
+                                        "QPushButton:hover { background-color: #%3; }")
+                                        .arg(mg::styles::LuaEditorColors::KEYWORD, 6, 16, QChar('0'))
+                                        .arg(mg::styles::LuaEditorColors::IDENTIFIER, 6, 16, QChar('0'))
+                                        .arg(mg::styles::LuaEditorColors::OPERATOR, 6, 16, QChar('0')));
 
         // Create horizontal layout for input and button
         auto inputLayout = new QHBoxLayout();
