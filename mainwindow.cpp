@@ -77,8 +77,9 @@ void MainWindow::toggleFileExplorer()
 
 void MainWindow::handleFileSelected(const QString& filePath)
 {
-    // TODO: Implement file opening in the code editor
-    qDebug() << "Selected file:" << filePath;
+    if (_editor) {
+        _editor->openFile(filePath);
+    }
 }
 
 MainWindow::~MainWindow()

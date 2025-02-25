@@ -13,6 +13,8 @@
 #include <QVBoxLayout>
 #include <QResizeEvent>
 #include "GenericEditor.h"
+#include <QFile>
+#include <QTextStream>
 
 namespace aic
 {
@@ -56,6 +58,19 @@ namespace aic
     {
       return _centralWidget;
     }
+
+    void openFile(const QString& filePath)
+    {
+      QFile file(filePath);
+      if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream in(&file);
+        QString content = in.readAll();
+        file.close();
+        _editor->setText(content.toUtf8().constData());
+        _currentFilePath = filePath;
+      }
+    }
+
   private:
     void updateActions() {}
 
@@ -68,6 +83,7 @@ namespace aic
 
     GenericEditor* _editor{nullptr};
     QWidget* _centralWidget{nullptr};
+    QString _currentFilePath;
   };
 }
 #endif //QWIDGET_LUA_EDITOR_CODEEDITOR_H

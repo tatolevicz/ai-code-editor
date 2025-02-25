@@ -100,13 +100,27 @@ private:
     );
 
     _fileModel = new QFileSystemModel(this);
-    _fileModel->setFilter(QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Files);
-    _fileModel->setNameFilterDisables(false);
+    _fileModel->setFilter(QDir::NoDotAndDotDot | QDir::AllEntries);
     _treeView->setModel(_fileModel);
+
+    // Hide unnecessary columns
+    for (int i = 1; i < _fileModel->columnCount(); ++i) {
+        _treeView->hideColumn(i);
+    }
+
     _treeView->setHeaderHidden(true);
-    _treeView->setColumnHidden(1, true);  // Tamanho
-    _treeView->setColumnHidden(2, true);  // Tipo
-    _treeView->setColumnHidden(3, true);  // Data de modificação
+    _treeView->setContextMenuPolicy(Qt::CustomContextMenu);
+
+    // Connect signals
+    connect(_treeView, &QTreeView::customContextMenuRequested, this, &FileExplorerWidget::showContextMenu);
+    connect(_treeView, &QTreeView::clicked, this, [this](const QModelIndex &index) {
+        QString path = _fileModel->filePath(index);
+        if (!_fileModel->isDir(index)) {
+            emit fileSelected(path);
+        }
+    });
+    connect(newFileButton, &QPushButton::clicked, this, &FileExplorerWidget::onNewFileClicked);
+    connect(refreshButton, &QPushButton::clicked, this, &FileExplorerWidget::onRefreshClicked);
 
     mainLayout->addWidget(_treeView);
 
@@ -118,10 +132,6 @@ private:
     // Conexões de sinais
     connect(_treeView, &QTreeView::doubleClicked,
             this, &FileExplorerWidget::onItemDoubleClicked);
-    connect(newFileButton, &QPushButton::clicked,
-            this, &FileExplorerWidget::onNewFileClicked);
-    connect(refreshButton, &QPushButton::clicked,
-            this, &FileExplorerWidget::onRefreshClicked);
 
     setLayout(mainLayout);
   }
