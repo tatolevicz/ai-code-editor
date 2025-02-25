@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QTextEdit>
 #include <QLineEdit>
 #include <QPushButton>
@@ -22,17 +23,38 @@ private:
     QTextEdit *responseArea;
     QLineEdit *promptInput;
     QPushButton *sendButton;
+    QPushButton *closeButton;
 
     void setupUI()
     {
-        auto layout = new QVBoxLayout(this);
+        auto mainLayout = new QVBoxLayout(this);
+        mainLayout->setContentsMargins(0, 0, 0, 0);
+        
+        // Header with close button
+        auto headerLayout = new QHBoxLayout();
+        headerLayout->setContentsMargins(4, 4, 4, 4);
+        
+        // Spacer to push close button to the right
+        headerLayout->addStretch();
+        
+        // Close button setup
+        closeButton = new QPushButton("×", this);
+        closeButton->setFixedSize(20, 20);
+        closeButton->setStyleSheet("QPushButton { border: none; border-radius: 10px; background-color: #ff6b6b; color: white; font-weight: bold; }"
+                                 "QPushButton:hover { background-color: #ff4444; }");
+        headerLayout->addWidget(closeButton);
+        mainLayout->addLayout(headerLayout);
+        
+        // Main content layout
+        auto contentLayout = new QVBoxLayout();
+        contentLayout->setContentsMargins(8, 0, 8, 8);
         
         // Response area setup
         responseArea = new QTextEdit(this);
         responseArea->setReadOnly(true);
         responseArea->setPlaceholderText("AI responses will appear here...");
         responseArea->setStyleSheet("QTextEdit { background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; padding: 8px; }");
-        layout->addWidget(responseArea);
+        contentLayout->addWidget(responseArea);
 
         // Prompt input setup
         promptInput = new QLineEdit(this);
@@ -48,13 +70,16 @@ private:
         auto inputLayout = new QHBoxLayout();
         inputLayout->addWidget(promptInput);
         inputLayout->addWidget(sendButton);
-        layout->addLayout(inputLayout);
+        contentLayout->addLayout(inputLayout);
+        
+        mainLayout->addLayout(contentLayout);
 
         // Connect signals and slots
         connect(sendButton, &QPushButton::clicked, this, &AIChatWidget::onSendClicked);
         connect(promptInput, &QLineEdit::returnPressed, this, &AIChatWidget::onSendClicked);
+        connect(closeButton, &QPushButton::clicked, this, &QWidget::hide);
 
-        setLayout(layout);
+        setLayout(mainLayout);
     }
 
 private slots:
@@ -62,14 +87,8 @@ private slots:
     {
         QString prompt = promptInput->text();
         if (!prompt.isEmpty()) {
-            // Add the user's prompt to the response area
             responseArea->append("<b>You:</b> " + prompt);
-            
-            // TODO: Implement AI response handling here
-            // For now, we'll just clear the input
             promptInput->clear();
-            
-            // Emit signal for handling the prompt
             emit promptSubmitted(prompt);
         }
     }

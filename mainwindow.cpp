@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include <QResizeEvent>
+#include <QShortcut>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -26,6 +27,28 @@ MainWindow::MainWindow(QWidget *parent)
     connect(_aiChat, &AIChatWidget::promptSubmitted, this, &MainWindow::handleAIPrompt);
     
     setCentralWidget(_centralWidget);
+    
+    // Setup actions and shortcuts
+    setupActions();
+}
+
+void MainWindow::setupActions()
+{
+    // Create toggle action
+    _toggleAIChatAction = new QAction("Toggle AI Chat", this);
+    _toggleAIChatAction->setShortcut(QKeySequence("Ctrl+Shift+A"));
+    _toggleAIChatAction->setStatusTip("Show/Hide AI Chat Widget");
+    connect(_toggleAIChatAction, &QAction::triggered, this, &MainWindow::toggleAIChatWidget);
+    
+    // Add action to window
+    addAction(_toggleAIChatAction);
+}
+
+void MainWindow::toggleAIChatWidget()
+{
+    if (_aiChat) {
+        _aiChat->setVisible(!_aiChat->isVisible());
+    }
 }
 
 MainWindow::~MainWindow()
