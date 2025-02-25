@@ -11,8 +11,12 @@
 #include <QMetaObject>
 #include "MgStyles.h"
 
-#include <AIStreamer.h>
-#include <AgentProcessor.h>
+//#include <AIStreamer.h>
+//#include <AgentProcessor.h>
+//#include <AIAgent.h>
+#ifndef Q_MOC_RUN
+#include <ais>
+#endif
 
 class AIChatWidget : public QWidget
 {
@@ -21,7 +25,8 @@ class AIChatWidget : public QWidget
 public:
     explicit AIChatWidget(QWidget *parent = nullptr) : QWidget(parent),
         _streamer(std::make_shared<ais::AIStreamer>()),
-        _processor(std::make_shared<ais::AgentProcessor>())
+        _processor(std::make_shared<ais::AgentProcessor>()),
+        _agent(std::make_shared<ais::AIAgent>(ais::agents::cascade))
     {
         setFixedWidth(400);
         setupUI();
@@ -37,7 +42,9 @@ private:
     // AI Components
     std::shared_ptr<ais::AIStreamer> _streamer;
     std::shared_ptr<ais::AgentProcessor> _processor;
-    bool _isProcessing{false};
+    std::shared_ptr<ais::AIAgent> _agent;
+
+  bool _isProcessing{false};
     QTimer _processingTimer;
 
     void setupAI()
@@ -151,15 +158,16 @@ private:
 private slots:
     void onSendClicked()
     {
-        QString prompt = promptInput->text();
+        auto prompt = promptInput->text();
         if (!prompt.isEmpty() && !_isProcessing) {
+            _agent->addUserMessage(prompt.toStdString());
+
             responseArea->append("<b>You:</b> " + prompt);
             responseArea->append("<b>AI:</b> ");
             promptInput->clear();
-            
-            // Chama o streamer com a mensagem do usuário
-            _streamer->call(prompt.toStdString());
-            
+
+            _streamer->call(*_agent);
+
             emit promptSubmitted(prompt);
         }
     }
