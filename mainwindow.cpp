@@ -3,6 +3,7 @@
 #include <QResizeEvent>
 #include <QShortcut>
 #include <QDir>
+#include <QProcess>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -56,10 +57,49 @@ MainWindow::MainWindow(QWidget *parent)
 void MainWindow::setupTerminal()
 {
     _terminal = new QTermWidget(0, _centralWidget);
+    
+    // Configure shell program
+    _terminal->setShellProgram("/bin/zsh"); // Use zsh as default shell on macOS
+    
+    // Set environment variables
+    QStringList environment = QProcess::systemEnvironment();
+    environment << "TERM=xterm-256color";
+    _terminal->setEnvironment(environment);
+    
+    // Configure appearance
     _terminal->setColorScheme("Solarized");
     _terminal->setTerminalFont(QFont("Monospace", 10));
     _terminal->setScrollBarPosition(QTermWidget::ScrollBarRight);
     _terminal->setWorkingDirectory(QDir::currentPath());
+    
+    // Enable flow control and other terminal features
+    _terminal->setFlowControlEnabled(true);
+    _terminal->setFlowControlWarningEnabled(true);
+    
+    // Enable context menu
+    _terminal->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(_terminal, &QWidget::customContextMenuRequested, this, [this](const QPoint &pos) {
+        QMenu *menu = new QMenu(_terminal);
+        
+        // Add common terminal actions
+        menu->addAction("Copy", _terminal, &QTermWidget::copyClipboard);
+        menu->addAction("Paste", _terminal, &QTermWidget::pasteClipboard);
+        menu->addSeparator();
+        menu->addAction("Clear", _terminal, &QTermWidget::clear);
+        
+        menu->exec(_terminal->mapToGlobal(pos));
+        menu->deleteLater();
+    });
+    
+    // Connect terminal signals
+    connect(_terminal, &QTermWidget::finished, this, [this]() {
+        // Restart shell when it exits
+        _terminal->startShellProgram();
+    });
+    
+    // Start the shell
+    _terminal->startShellProgram();
+    
     _editorLayout->addWidget(_terminal, 3); // 30% of space
 }
 
