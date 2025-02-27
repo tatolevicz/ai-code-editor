@@ -74,7 +74,7 @@ namespace aic
       // Set editor background color to the new DARKEST background color for code area
       setStyleSheet(QString("QsciScintilla { background-color: #%1; }")
                    .arg(mg::theme::Colors::CODE_BG, 6, 16, QChar('0')));
-      
+
       // Basic editor settings - using direct Scintilla messages
       // Show line numbers in margin 0
       send(SCI_SETMARGINTYPEN, 0, SC_MARGIN_NUMBER);

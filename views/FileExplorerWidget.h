@@ -140,7 +140,7 @@ private:
                 "QTreeView::branch:closed:has-children:has-siblings { image: url(none); }"
                 "QTreeView::branch:open:has-children:!has-siblings,"
                 "QTreeView::branch:open:has-children:has-siblings { image: url(none); }")
-                .arg(mg::theme::Colors::SIDEBAR_BG, 6, 16, QChar('0'))
+                .arg(mg::theme::Colors::BACKGROUND, 6, 16, QChar('0'))
                 .arg(mg::theme::Colors::DEFAULT_TEXT, 6, 16, QChar('0'))
                 .arg(mg::theme::Colors::ACTIVE_ITEM, 6, 16, QChar('0'))
                 .arg(mg::theme::Colors::PRIMARY, 6, 16, QChar('0'))
