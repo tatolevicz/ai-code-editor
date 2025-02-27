@@ -16,6 +16,7 @@
 #include <QMessageBox>
 #include <QFileInfo>
 #include <QLineEdit>
+#include <QProcess>
 #include "MgStyles.h"
 #include "MagiaTheme.h"
 
@@ -308,6 +309,7 @@ private slots:
     _newFolder  = new QAction("New Folder", this);
     _deleteItem = new QAction("Delete", this);
     _renameItem = new QAction("Rename", this);
+    _openInFinder = new QAction("Open in Finder", this);
 
     connect(_newFile, &QAction::triggered, [this, currentPath]() {
       createNewFile(currentPath);
@@ -324,6 +326,10 @@ private slots:
     connect(_renameItem, &QAction::triggered, [this, currentPath]() {
       renameItem(currentPath);
     });
+    
+    connect(_openInFinder, &QAction::triggered, [this, currentPath]() {
+      openInFinder(currentPath);
+    });
 
     contextMenu.addAction(_newFile);
     contextMenu.addAction(_newFolder);
@@ -334,9 +340,30 @@ private slots:
     if (index.isValid()) {
       contextMenu.addAction(_deleteItem);
       contextMenu.addAction(_renameItem);
+      
+      // Adicionar separador e opção Open in Finder
+      contextMenu.addSeparator();
+      contextMenu.addAction(_openInFinder);
     }
 
     contextMenu.exec(_treeView->mapToGlobal(pos));
+  }
+
+  void openInFinder(const QString& path)
+  {
+    QFileInfo fileInfo(path);
+    QString targetPath;
+    
+    // Se for um arquivo, abrir o diretório que o contém
+    if (fileInfo.isFile()) {
+      targetPath = fileInfo.dir().path();
+    } else {
+      // Se for um diretório, abrir o próprio diretório
+      targetPath = path;
+    }
+    
+    // No macOS, usamos o comando "open" para abrir no Finder
+    QProcess::startDetached("open", QStringList() << targetPath);
   }
 
 signals:
@@ -351,6 +378,7 @@ private:
   QAction* _newFolder;
   QAction* _deleteItem;
   QAction* _renameItem;
+  QAction* _openInFinder;
 };
 
 #endif // FILEEXPLORERWIDGET_H
