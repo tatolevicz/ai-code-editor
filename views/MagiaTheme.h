@@ -7,6 +7,7 @@ namespace theme {
 // Main UI Colors
 struct Colors {
     // Main colors
+    inline static int CODE_BG = 0x181830;            // #181830 - Darkest blue-purple (for code area)
     inline static int BACKGROUND = 0x1E1E3F;         // #1E1E3F - Dark blue-purple background
     inline static int SIDEBAR_BG = 0x2D2B55;         // #2D2B55 - Sidebar background
     inline static int ACTIVE_ITEM = 0x433C7E;        // #433C7E - Active/selected items 
@@ -38,7 +39,9 @@ struct Colors {
 // Specific colors for Scintilla in BGR format (note: Scintilla requires BGR instead of RGB)
 struct ScintillaColors {
     // Syntax highlighting colors
+    inline static int CODE_BG = 0x301818;            // #181830 - Darkest blue-purple (for code area) - BGR format
     inline static int BACKGROUND = 0x3F1E1E;         // #1E1E3F - Dark blue-purple background
+    inline static int MARGIN_BG = 0x3F1E1E;          // #181830 - Use darker bg for margins (same as CODE_BG)
     inline static int DEFAULT_TEXT = 0xE0E0E0;       // #E0E0E0 - Light gray text
     inline static int KEYWORD = 0xC679FF;            // #FF79C6 - Pink (keywords)
     inline static int STRING = 0x8CFAF1;             // #F1FA8C - Yellow (strings)
@@ -50,7 +53,6 @@ struct ScintillaColors {
     inline static int LINE_ACTIVE = 0x553743;        // #433755 - Active line highlight
     inline static int SELECTION_BG = 0xC2577E;       // #7E57C2 - Selection background
     inline static int SELECTION_FG = 0xFFFFFF;       // #FFFFFF - Selection foreground
-    inline static int MARGIN_BG = 0x552B2D;          // #2D2B55 - Margin background
     inline static int BRACE_MATCH = 0x7BFA50;        // #50FA7B - Matching brace highlight
     inline static int BRACE_MISMATCH = 0x3333FF;     // #FF3333 - Mismatched brace
 };

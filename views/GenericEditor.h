@@ -71,14 +71,14 @@ namespace aic
         fontFamily = "Courier New";
       }
       
-      // Set editor background color
+      // Set editor background color to the new DARKEST background color for code area
       setStyleSheet(QString("QsciScintilla { background-color: #%1; }")
-                   .arg(mg::theme::Colors::BACKGROUND, 6, 16, QChar('0')));
+                   .arg(mg::theme::Colors::CODE_BG, 6, 16, QChar('0')));
       
       // Basic editor settings - using direct Scintilla messages
       // Show line numbers in margin 0
       send(SCI_SETMARGINTYPEN, 0, SC_MARGIN_NUMBER);
-      send(SCI_SETMARGINWIDTHN, 0, 50);
+      send(SCI_SETMARGINWIDTHN, 0, 40);
       
       // Indentation settings
       send(SCI_SETUSETABS, false);
@@ -90,14 +90,14 @@ namespace aic
       send(SCI_STYLESETFONT, STYLE_DEFAULT, reinterpret_cast<sptr_t>(fontFamily.toUtf8().constData()));
       send(SCI_STYLESETSIZE, STYLE_DEFAULT, 11);
       send(SCI_STYLESETFORE, STYLE_DEFAULT, mg::theme::ScintillaColors::DEFAULT_TEXT);
-      send(SCI_STYLESETBACK, STYLE_DEFAULT, mg::theme::ScintillaColors::BACKGROUND);
+      send(SCI_STYLESETBACK, STYLE_DEFAULT, mg::theme::ScintillaColors::CODE_BG); // Usar a nova cor mais escura
 
       // Apply to all styles
       send(SCI_STYLECLEARALL);
 
       // Line numbers style
       send(SCI_STYLESETFORE, STYLE_LINENUMBER, mg::theme::ScintillaColors::LINE_NUMBERS);
-      send(SCI_STYLESETBACK, STYLE_LINENUMBER, mg::theme::ScintillaColors::MARGIN_BG);
+      send(SCI_STYLESETBACK, STYLE_LINENUMBER, mg::theme::ScintillaColors::CODE_BG); // Usar a nova cor mais escura aqui também
 
       // Set selection colors
       send(SCI_SETSELBACK, true, mg::theme::ScintillaColors::SELECTION_BG);
@@ -118,7 +118,7 @@ namespace aic
       send(SCI_STYLESETFORE, STYLE_BRACEBAD, mg::theme::ScintillaColors::BRACE_MISMATCH);
 
       // Set margin colors
-      send(SCI_SETMARGINBACKN, 0, mg::theme::ScintillaColors::MARGIN_BG);
+      send(SCI_SETMARGINBACKN, 1, mg::theme::ScintillaColors::MARGIN_BG);
       
       // Set fold margin
       send(SCI_SETFOLDMARGINCOLOUR, mg::theme::ScintillaColors::MARGIN_BG);
