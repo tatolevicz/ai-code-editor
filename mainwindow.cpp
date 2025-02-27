@@ -69,9 +69,16 @@ void MainWindow::setupTerminal()
     environment << "TERM=xterm-256color";
     _terminal->setEnvironment(environment);
     
-    // Configure appearance
-    _terminal->setColorScheme("Solarized");
-    _terminal->setTerminalFont(QFont("Monospace", 10));
+    // Configure appearance - use DarkPastels scheme instead of Solarized for better matching with our theme
+    _terminal->setColorScheme("DarkPastels");
+    
+    // Custom styling for the terminal - use colors that match our theme
+    QPalette palette = _terminal->palette();
+    palette.setColor(QPalette::Base, QColor("#1E1E3F")); // Match main background color
+    palette.setColor(QPalette::Text, QColor("#E0E0E0")); // Match default text color
+    _terminal->setPalette(palette);
+    
+    _terminal->setTerminalFont(QFont("JetBrains Mono", 10)); // Use same font as editor
     _terminal->setScrollBarPosition(QTermWidget::ScrollBarRight);
     _terminal->setWorkingDirectory(QDir::currentPath());
     
