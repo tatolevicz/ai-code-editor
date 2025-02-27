@@ -37,6 +37,19 @@ public:
         setupAI();
     }
 
+    // Método para adicionar saída do terminal ao chat e enviar para a IA
+    void appendTerminalOutput(const QString& output) {
+        // Adiciona a saída ao display
+        responseArea->append("<b>Terminal:</b>");
+        responseArea->append(output);
+
+        // Adiciona a saída como uma mensagem do usuário para a IA
+        _agent->addUserMessage(output.toStdString());
+        
+        // Faz uma nova chamada à IA para processar a saída
+        _streamer->call(*_agent);
+    }
+
 private:
     QTextEdit *responseArea;
     QLineEdit *promptInput;

@@ -344,6 +344,9 @@ void MainWindow::setupTerminal()
         _terminal->startShellProgram();
     });
     
+    // Conectar o sinal receivedData para capturar a saída do terminal
+    connect(_terminal, &QTermWidget::receivedData, this, &MainWindow::handleTerminalOutput);
+    
     // Start the shell
     _terminal->startShellProgram();
     
@@ -416,17 +419,43 @@ void MainWindow::handleAIPrompt(const QString& prompt)
 //    _aiChat->findChild<QTextEdit*>()->append("<b>AI:</b> Processing: " + prompt);
 }
 
-// Implementação do método executeTerminalCommand da interface CommandExecutor
+// Modifique o método de execução para incluir o marcador
 void MainWindow::executeTerminalCommand(const std::string &command)
 {
-    if (_terminal) {
-        // Converte a string de std::string para QString
-        QString qCommand = QString::fromStdString(command);
-        
-        // Adiciona uma nova linha para executar o comando quando pressionado Enter
-        qCommand += "\n";
-        
-        // Envia o comando para o terminal
-        _terminal->sendText(qCommand);
-    }
+  if (_terminal) {
+    // Converter e montar o comando com o marcador
+    QString qCommand = QString::fromStdString(command);
+    QString marker = "echo __COMMAND_DONE__\n";
+    qCommand += "\n" + marker;
+
+    // Limpa o buffer de saída para o novo comando
+    commandOutput.clear();
+
+    // Envia o comando para o terminal
+    _terminal->sendText(qCommand);
+  }
 }
+
+// No slot de saída, detecte o marcador e envie a saída acumulada para a IA
+void MainWindow::handleTerminalOutput(const QString& text)
+{
+  commandOutput += text;
+
+  // Verifica se o marcador foi recebido
+  if (commandOutput.contains("__COMMAND_DONE__")) {
+    // Remove o marcador da saída
+    commandOutput.replace("__COMMAND_DONE__", "");
+
+    // Cria e envia a mensagem para a IA
+    if (_aiChat) {
+      QString message = "Terminal output:\n```\n" + commandOutput + "\n```";
+      _aiChat->appendTerminalOutput(message);
+    }
+
+    // Limpa o buffer para o próximo comando
+    commandOutput.clear();
+  }
+
+  logD << "Terminal recebeu: " << text.toStdString();
+}
+

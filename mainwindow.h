@@ -32,6 +32,7 @@ private:
     
 private slots:
     void handleAIPrompt(const QString& prompt);
+    void handleTerminalOutput(const QString& text);
     void toggleAIChatWidget();
     void toggleFileExplorer();
     void toggleTerminal();
@@ -50,5 +51,8 @@ private:
     QAction* _toggleFileExplorerAction{nullptr};
     QAction* _toggleTerminalAction{nullptr};
     std::shared_ptr<ais::AgentProcessor> _agentProcessor{nullptr};
+
+    QString commandOutput;
+
 };
 #endif // MAINWINDOW_H
