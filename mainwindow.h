@@ -53,6 +53,8 @@ private:
     std::shared_ptr<ais::AgentProcessor> _agentProcessor{nullptr};
 
     QString commandOutput;
+    void executeBashCommand(const std::string &command);
+
 
 };
 #endif // MAINWINDOW_H

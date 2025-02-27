@@ -84,7 +84,7 @@ void MainWindow::registerAICallbacks()
             }
             
             // Executar o comando no terminal
-            this->executeTerminalCommand(fullCommand);
+            this->executeBashCommand(fullCommand);
         }
     });
     
@@ -419,6 +419,32 @@ void MainWindow::handleAIPrompt(const QString& prompt)
 //    _aiChat->findChild<QTextEdit*>()->append("<b>AI:</b> Processing: " + prompt);
 }
 
+void MainWindow::executeBashCommand(const std::string &command)
+{
+  QProcess process;
+  process.start("bash", QStringList() << "-c" << QString::fromStdString(command));
+
+  // Aguarda o término do comando
+  process.waitForFinished();
+
+  int exitCode = process.exitCode();
+  QString output = process.readAllStandardOutput();
+  QString errorOutput = process.readAllStandardError();
+  QString message;
+  if (exitCode == 0) {
+    // Sucesso: processou o comando corretamente
+    if (_aiChat) {
+      message = "Command ["  + QString::fromStdString(command) +  "] executado com sucesso! A saída foi: ```\n" + output + "\n```";
+    }
+  } else {
+    // Erro na execução do comando
+    if (_aiChat) {
+       message = "Command error (" + QString::number(exitCode) + "):\n```\n" + errorOutput + "\n```";
+    }
+  }
+  _aiChat->appendTerminalOutput(message);
+  qDebug() << "Terminal: " + message;
+}
 // Modifique o método de execução para incluir o marcador
 void MainWindow::executeTerminalCommand(const std::string &command)
 {
@@ -436,10 +462,17 @@ void MainWindow::executeTerminalCommand(const std::string &command)
   }
 }
 
-// No slot de saída, detecte o marcador e envie a saída acumulada para a IA
+QString cleanTerminalOutput(QString input) {
+  // Regex para remover sequências ANSI
+  QRegularExpression ansiRegex("\x1B\\[[0-?]*[ -/]*[@-~]");
+  return input.remove(ansiRegex);
+}
+
 void MainWindow::handleTerminalOutput(const QString& text)
 {
-  commandOutput += text;
+  // Limpa o texto recebido
+  QString cleanText = cleanTerminalOutput(text);
+  commandOutput += cleanText;
 
   // Verifica se o marcador foi recebido
   if (commandOutput.contains("__COMMAND_DONE__")) {
