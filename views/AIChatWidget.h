@@ -9,7 +9,9 @@
 #include <QPushButton>
 #include <QTimer>
 #include <QMetaObject>
+#include <QLabel>
 #include "MgStyles.h"
+#include "MagiaTheme.h"
 
 //#include <AIStreamer.h>
 //#include <AgentProcessor.h>
@@ -38,6 +40,7 @@ private:
     QLineEdit *promptInput;
     QPushButton *sendButton;
     QPushButton *closeButton;
+    QLabel *titleLabel;
     
     // AI Components
     std::shared_ptr<ais::AIStreamer> _streamer;
@@ -90,71 +93,97 @@ private:
         auto mainLayout = new QVBoxLayout(this);
         mainLayout->setContentsMargins(0, 0, 0, 0);
         
-        // Header with close button
+        // Set widget background color using the new theme colors
+        setStyleSheet(QString("AIChatWidget { background-color: #%1; border-left: 1px solid #%2; }")
+                     .arg(mg::theme::Colors::SIDEBAR_BG, 6, 16, QChar('0'))
+                     .arg(mg::theme::Colors::BORDER, 6, 16, QChar('0')));
+        
+        // Header with title and close button
         auto headerLayout = new QHBoxLayout();
-        headerLayout->setContentsMargins(4, 4, 4, 4);
+        headerLayout->setContentsMargins(12, 12, 12, 12);
+        headerLayout->setSpacing(8);
         
-        // Set widget background color
-        setStyleSheet(QString("AIChatWidget { background-color: #%1; }").arg(mg::styles::LuaEditorColors::DARK_BACKGROUND, 6, 16, QChar('0')));
+        // Add AI Chat title with icon
+        titleLabel = new QLabel("AI Assistant", this);
+        titleLabel->setStyleSheet(QString("QLabel { color: #%1; font-weight: bold; font-size: 14px; }")
+                               .arg(mg::theme::Colors::DEFAULT_TEXT, 6, 16, QChar('0')));
         
-        // Spacer to push close button to the right
+        headerLayout->addWidget(titleLabel);
         headerLayout->addStretch();
         
-        // Close button setup
+        // Close button setup with modern design
         closeButton = new QPushButton("×", this);
-        closeButton->setFixedSize(20, 20);
-        closeButton->setStyleSheet("QPushButton { border: none; border-radius: 10px; background-color: #B46981; color: white; font-weight: bold; }"
-                                 "QPushButton:hover { background-color: #D98E6C; }");
+        closeButton->setFixedSize(24, 24);
+        closeButton->setStyleSheet(QString("QPushButton { border: none; border-radius: 12px; background-color: #%1; color: #%2; font-weight: bold; font-size: 16px; }"
+                                  "QPushButton:hover { background-color: #%3; }")
+                                  .arg(mg::theme::Colors::PRIMARY, 6, 16, QChar('0'))
+                                  .arg(mg::theme::Colors::DEFAULT_TEXT, 6, 16, QChar('0'))
+                                  .arg(mg::theme::Colors::ACTIVE_ITEM, 6, 16, QChar('0')));
         headerLayout->addWidget(closeButton);
         mainLayout->addLayout(headerLayout);
         
+        // Add separator line
+        QFrame* separator = new QFrame(this);
+        separator->setFrameShape(QFrame::HLine);
+        separator->setFrameShadow(QFrame::Sunken);
+        separator->setStyleSheet(QString("QFrame { background-color: #%1; max-height: 1px; }")
+                               .arg(mg::theme::Colors::BORDER, 6, 16, QChar('0')));
+        mainLayout->addWidget(separator);
+        
         // Main content layout
         auto contentLayout = new QVBoxLayout();
-        contentLayout->setContentsMargins(8, 0, 8, 8);
+        contentLayout->setContentsMargins(12, 12, 12, 12);
+        contentLayout->setSpacing(12);
         
-        // Response area setup
+        // Response area setup with modern styling
         responseArea = new QTextEdit(this);
         responseArea->setReadOnly(true);
         responseArea->setPlaceholderText("AI responses will appear here...");
-        responseArea->setStyleSheet(QString("QTextEdit { background-color: #%1; color: #%2; border: 1px solid #%3; border-radius: 4px; padding: 8px; }"
-                                          "QTextEdit::placeholder { color: #%4; }")
-                                          .arg(mg::styles::LuaEditorColors::BACKGROUND, 6, 16, QChar('0'))
-                                          .arg(mg::styles::LuaEditorColors::IDENTIFIER, 6, 16, QChar('0'))
-                                          .arg(mg::styles::LuaEditorColors::OPERATOR, 6, 16, QChar('0'))
-                                          .arg(mg::styles::LuaEditorColors::COMMENT, 6, 16, QChar('0')));
+        responseArea->setStyleSheet(QString("QTextEdit { background-color: #%1; color: #%2; border: 1px solid #%3; border-radius: 8px; padding: 12px; font-family: 'JetBrains Mono', monospace; }"
+                                       "QTextEdit::placeholder { color: #%4; }")
+                                       .arg(mg::theme::Colors::BACKGROUND, 6, 16, QChar('0'))
+                                       .arg(mg::theme::Colors::DEFAULT_TEXT, 6, 16, QChar('0'))
+                                       .arg(mg::theme::Colors::BORDER, 6, 16, QChar('0'))
+                                       .arg(mg::theme::Colors::COMMENT, 6, 16, QChar('0')));
         contentLayout->addWidget(responseArea);
-
-        // Prompt input setup
-        promptInput = new QLineEdit(this);
-        promptInput->setPlaceholderText("Type your prompt here...");
-        promptInput->setStyleSheet(QString("QLineEdit { padding: 8px; background-color: #%1; color: #%2; border: 1px solid #%3; border-radius: 4px; }"
-                                         "QLineEdit::placeholder { color: #%4; }")
-                                         .arg(mg::styles::LuaEditorColors::BACKGROUND, 6, 16, QChar('0'))
-                                         .arg(mg::styles::LuaEditorColors::IDENTIFIER, 6, 16, QChar('0'))
-                                         .arg(mg::styles::LuaEditorColors::OPERATOR, 6, 16, QChar('0'))
-                                         .arg(mg::styles::LuaEditorColors::COMMENT, 6, 16, QChar('0')));
         
-        // Send button setup
-        sendButton = new QPushButton("Send", this);
-        sendButton->setStyleSheet(QString("QPushButton { padding: 8px 16px; background-color: #%1; color: #%2; border: none; border-radius: 4px; }"
-                                        "QPushButton:hover { background-color: #%3; }")
-                                        .arg(mg::styles::LuaEditorColors::KEYWORD, 6, 16, QChar('0'))
-                                        .arg(mg::styles::LuaEditorColors::IDENTIFIER, 6, 16, QChar('0'))
-                                        .arg(mg::styles::LuaEditorColors::OPERATOR, 6, 16, QChar('0')));
-
-        // Create horizontal layout for input and button
-        auto inputLayout = new QHBoxLayout();
+        // Input area with rounded corners and modern styling
+        auto inputContainer = new QWidget(this);
+        inputContainer->setStyleSheet(QString("QWidget { background-color: #%1; border: 1px solid #%2; border-radius: 8px; }")
+                                    .arg(mg::theme::Colors::BACKGROUND, 6, 16, QChar('0'))
+                                    .arg(mg::theme::Colors::BORDER, 6, 16, QChar('0')));
+                                    
+        auto inputLayout = new QHBoxLayout(inputContainer);
+        inputLayout->setContentsMargins(8, 8, 8, 8);
+        inputLayout->setSpacing(8);
+        
+        // Prompt input setup
+        promptInput = new QLineEdit(inputContainer);
+        promptInput->setPlaceholderText("Type your prompt here...");
+        promptInput->setStyleSheet(QString("QLineEdit { padding: 8px; background-color: transparent; color: #%1; border: none; font-family: 'JetBrains Mono', monospace; }"
+                                      "QLineEdit::placeholder { color: #%2; }")
+                                      .arg(mg::theme::Colors::DEFAULT_TEXT, 6, 16, QChar('0'))
+                                      .arg(mg::theme::Colors::COMMENT, 6, 16, QChar('0')));
+        
+        // Send button setup with modern purple styling
+        sendButton = new QPushButton("Send", inputContainer);
+        sendButton->setStyleSheet(QString("QPushButton { padding: 8px 16px; background-color: #%1; color: #%2; border: none; border-radius: 4px; font-weight: bold; }"
+                                     "QPushButton:hover { background-color: #%3; }")
+                                     .arg(mg::theme::Colors::PRIMARY, 6, 16, QChar('0'))
+                                     .arg(mg::theme::Colors::DEFAULT_TEXT, 6, 16, QChar('0'))
+                                     .arg(mg::theme::Colors::ACTIVE_ITEM, 6, 16, QChar('0')));
+        
         inputLayout->addWidget(promptInput);
         inputLayout->addWidget(sendButton);
-        contentLayout->addLayout(inputLayout);
+        contentLayout->addWidget(inputContainer);
         
         mainLayout->addLayout(contentLayout);
-
+        
         // Connect signals and slots
         connect(sendButton, &QPushButton::clicked, this, &AIChatWidget::onSendClicked);
         connect(promptInput, &QLineEdit::returnPressed, this, &AIChatWidget::onSendClicked);
         connect(closeButton, &QPushButton::clicked, this, &QWidget::hide);
-
+        
         setLayout(mainLayout);
     }
 

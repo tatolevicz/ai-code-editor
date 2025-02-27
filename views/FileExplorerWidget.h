@@ -15,7 +15,9 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QFileInfo>
+#include <QLineEdit>
 #include "MgStyles.h"
+#include "MagiaTheme.h"
 
 class FileExplorerWidget : public QWidget
 {
@@ -40,65 +42,111 @@ private:
   void setupUI()
   {
     setFixedWidth(250);
-    // Fundo geral com DARK_BACKGROUND
-    setStyleSheet(QString("FileExplorerWidget { background-color: #%1; }")
-                 .arg(mg::styles::LuaEditorColors::DARK_BACKGROUND, 6, 16, QChar('0')));
+    // Modern purple background using the new theme
+    setStyleSheet(QString("FileExplorerWidget { background-color: #%1; border-right: 1px solid #%2; }")
+                 .arg(mg::theme::Colors::SIDEBAR_BG, 6, 16, QChar('0'))
+                 .arg(mg::theme::Colors::BORDER, 6, 16, QChar('0')));
 
     auto mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
 
-    // Cabeçalho com fundo DARK_BACKGROUND
+    // Header with modern styling
     auto headerWidget = new QWidget(this);
-    headerWidget->setStyleSheet(QString("background-color: #%1;")
-                              .arg(mg::styles::LuaEditorColors::DARK_BACKGROUND, 6, 16, QChar('0')));
-    auto headerLayout = new QHBoxLayout(headerWidget);
-    headerLayout->setContentsMargins(8, 4, 8, 4);
+    headerWidget->setStyleSheet(QString("background-color: #%1; border-bottom: 1px solid #%2;")
+                              .arg(mg::theme::Colors::SIDEBAR_BG, 6, 16, QChar('0'))
+                              .arg(mg::theme::Colors::BORDER, 6, 16, QChar('0')));
+    auto headerLayout = new QVBoxLayout(headerWidget);
+    headerLayout->setContentsMargins(12, 12, 12, 12);
+    headerLayout->setSpacing(12);
 
+    // Title and controls layout
+    auto titleControlsLayout = new QHBoxLayout();
+    titleControlsLayout->setSpacing(8);
+
+    // Logo and title
     auto titleLabel = new QLabel("EXPLORER", headerWidget);
-    titleLabel->setStyleSheet(QString("QLabel { color: #%1; font-size: 11px; font-weight: bold; }")
-                            .arg(mg::styles::LuaEditorColors::IDENTIFIER, 6, 16, QChar('0')));
-    headerLayout->addWidget(titleLabel);
+    titleLabel->setStyleSheet(QString("QLabel { color: #%1; font-size: 12px; font-weight: bold; }")
+                            .arg(mg::theme::Colors::DEFAULT_TEXT, 6, 16, QChar('0')));
+    titleControlsLayout->addWidget(titleLabel);
+    titleControlsLayout->addStretch();
 
-    // Botão New File
+    // New File button with modern styling
     auto newFileButton = new QPushButton("+", headerWidget);
-    newFileButton->setFixedSize(20, 20);
+    newFileButton->setFixedSize(24, 24);
+    newFileButton->setToolTip("New File");
     newFileButton->setStyleSheet(
-        QString("QPushButton { border: 1px solid #%1; border-radius: 3px; background: transparent; color: #%2; }"
-                "QPushButton:hover { background: #%3; }")
-                .arg(mg::styles::LuaEditorColors::PRE_PROC, 6, 16, QChar('0'))
-                .arg(mg::styles::LuaEditorColors::IDENTIFIER, 6, 16, QChar('0'))
-                .arg(mg::styles::LuaEditorColors::LINE_ACIVE, 6, 16, QChar('0'))
+        QString("QPushButton { border: none; border-radius: 4px; background-color: #%1; color: #%2; font-weight: bold; }"
+                "QPushButton:hover { background-color: #%3; }")
+                .arg(mg::theme::Colors::PRIMARY, 6, 16, QChar('0'))
+                .arg(mg::theme::Colors::DEFAULT_TEXT, 6, 16, QChar('0'))
+                .arg(mg::theme::Colors::ACTIVE_ITEM, 6, 16, QChar('0'))
     );
-    headerLayout->addWidget(newFileButton);
+    titleControlsLayout->addWidget(newFileButton);
 
-    // Botão Refresh
+    // Refresh button with modern styling
     auto refreshButton = new QPushButton("⟳", headerWidget);
-    refreshButton->setFixedSize(20, 20);
+    refreshButton->setFixedSize(24, 24);
+    refreshButton->setToolTip("Refresh");
     refreshButton->setStyleSheet(
-        QString("QPushButton { border: 1px solid #%1; border-radius: 3px; background: transparent; color: #%2; }"
-                "QPushButton:hover { background: #%3; }")
-                .arg(mg::styles::LuaEditorColors::PRE_PROC, 6, 16, QChar('0'))
-                .arg(mg::styles::LuaEditorColors::IDENTIFIER, 6, 16, QChar('0'))
-                .arg(mg::styles::LuaEditorColors::LINE_ACIVE, 6, 16, QChar('0'))
+        QString("QPushButton { border: none; border-radius: 4px; background-color: #%1; color: #%2; font-weight: bold; }"
+                "QPushButton:hover { background-color: #%3; }")
+                .arg(mg::theme::Colors::PRIMARY, 6, 16, QChar('0'))
+                .arg(mg::theme::Colors::DEFAULT_TEXT, 6, 16, QChar('0'))
+                .arg(mg::theme::Colors::ACTIVE_ITEM, 6, 16, QChar('0'))
     );
-    headerLayout->addWidget(refreshButton);
+    titleControlsLayout->addWidget(refreshButton);
 
+    headerLayout->addLayout(titleControlsLayout);
+
+    // Add search input with modern styling
+    auto searchContainer = new QWidget(headerWidget);
+    searchContainer->setStyleSheet(QString("QWidget { background-color: #%1; border: 1px solid #%2; border-radius: 8px; }")
+                                .arg(mg::theme::Colors::BACKGROUND, 6, 16, QChar('0'))
+                                .arg(mg::theme::Colors::BORDER, 6, 16, QChar('0')));
+    
+    auto searchLayout = new QHBoxLayout(searchContainer);
+    searchLayout->setContentsMargins(8, 4, 8, 4);
+    searchLayout->setSpacing(4);
+    
+    // Search icon label (using unicode for simplicity)
+    auto searchIcon = new QLabel("🔍", searchContainer);
+    searchIcon->setStyleSheet(QString("QLabel { color: #%1; background-color: transparent; }")
+                           .arg(mg::theme::Colors::COMMENT, 6, 16, QChar('0')));
+    searchLayout->addWidget(searchIcon);
+    
+    // Search input
+    auto searchInput = new QLineEdit(searchContainer);
+    searchInput->setPlaceholderText("Search files...");
+    searchInput->setStyleSheet(QString("QLineEdit { background-color: transparent; border: none; color: #%1; }"
+                                    "QLineEdit::placeholder { color: #%2; }")
+                                    .arg(mg::theme::Colors::DEFAULT_TEXT, 6, 16, QChar('0'))
+                                    .arg(mg::theme::Colors::COMMENT, 6, 16, QChar('0')));
+    searchLayout->addWidget(searchInput);
+    
+    headerLayout->addWidget(searchContainer);
+    
     mainLayout->addWidget(headerWidget);
 
-    // TreeView com fundo BACKGROUND e texto IDENTIFIER
+    // TreeView with modern styling
     _treeView = new QTreeView(this);
     _treeView->setStyleSheet(
-        QString("QTreeView { background-color: #%1; color: #%2; border: none; }"
-                "QTreeView::item { height: 24px; }"
-                "QTreeView::item:hover { background: #%3; }"
-                "QTreeView::item:selected { background: #%4; color: black; }")
-                .arg(mg::styles::LuaEditorColors::BACKGROUND, 6, 16, QChar('0'))
-                .arg(mg::styles::LuaEditorColors::IDENTIFIER, 6, 16, QChar('0'))
-                .arg(mg::styles::LuaEditorColors::LINE_ACIVE, 6, 16, QChar('0'))
-                .arg(mg::styles::LuaEditorColors::PRE_PROC, 6, 16, QChar('0'))
+        QString("QTreeView { background-color: #%1; color: #%2; border: none; font-family: 'JetBrains Mono', monospace; padding: 8px; }"
+                "QTreeView::item { height: 28px; padding-left: 4px; }"
+                "QTreeView::item:hover { background: #%3; border-radius: 4px; }"
+                "QTreeView::item:selected { background: #%4; color: #%5; border-radius: 4px; }"
+                "QTreeView::branch { background: transparent; }"
+                "QTreeView::branch:has-children:!has-siblings:closed,"
+                "QTreeView::branch:closed:has-children:has-siblings { image: url(none); }"
+                "QTreeView::branch:open:has-children:!has-siblings,"
+                "QTreeView::branch:open:has-children:has-siblings { image: url(none); }")
+                .arg(mg::theme::Colors::SIDEBAR_BG, 6, 16, QChar('0'))
+                .arg(mg::theme::Colors::DEFAULT_TEXT, 6, 16, QChar('0'))
+                .arg(mg::theme::Colors::ACTIVE_ITEM, 6, 16, QChar('0'))
+                .arg(mg::theme::Colors::PRIMARY, 6, 16, QChar('0'))
+                .arg(mg::theme::Colors::DEFAULT_TEXT, 6, 16, QChar('0'))
     );
-
+    
     _fileModel = new QFileSystemModel(this);
     _fileModel->setFilter(QDir::NoDotAndDotDot | QDir::AllEntries);
     _treeView->setModel(_fileModel);
@@ -109,6 +157,8 @@ private:
     }
 
     _treeView->setHeaderHidden(true);
+    _treeView->setAnimated(true);
+    _treeView->setIndentation(20);
     _treeView->setContextMenuPolicy(Qt::CustomContextMenu);
 
     // Connect signals
@@ -123,11 +173,6 @@ private:
     connect(refreshButton, &QPushButton::clicked, this, &FileExplorerWidget::onRefreshClicked);
 
     mainLayout->addWidget(_treeView);
-
-    // Menu de contexto
-    _treeView->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(_treeView, &QTreeView::customContextMenuRequested,
-            this, &FileExplorerWidget::showContextMenu);
 
     // Conexões de sinais
     connect(_treeView, &QTreeView::doubleClicked,
