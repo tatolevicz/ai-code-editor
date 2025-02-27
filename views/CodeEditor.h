@@ -71,9 +71,8 @@ namespace aic
       
       // Create header with file info
       auto headerWidget = new QWidget(_centralWidget);
-      headerWidget->setStyleSheet(QString("QWidget { background-color: #%1; border-bottom: 1px solid #%2; }")
-                                .arg(mg::theme::Colors::SIDEBAR_BG, 6, 16, QChar('0'))
-                                .arg(mg::theme::Colors::BORDER, 6, 16, QChar('0')));
+      headerWidget->setStyleSheet(QString("QWidget { background-color: #%1; }")
+                                .arg(mg::theme::Colors::SIDEBAR_BG, 6, 16, QChar('0')));
       
       auto headerLayout = new QHBoxLayout(headerWidget);
       headerLayout->setContentsMargins(12, 8, 12, 8);
@@ -121,6 +120,14 @@ namespace aic
       headerLayout->addWidget(runButton);
       
       mainLayout->addWidget(headerWidget);
+      
+      // Add separator line similar to AI chat widget
+      QFrame* separator = new QFrame(_centralWidget);
+      separator->setFrameShape(QFrame::HLine);
+      separator->setFrameShadow(QFrame::Sunken);
+      separator->setStyleSheet(QString("QFrame { background-color: #%1; max-height: 1px; }")
+                             .arg(mg::theme::Colors::BORDER, 6, 16, QChar('0')));
+      mainLayout->addWidget(separator);
       
       // Create editor
       _editor = new GenericEditor(_centralWidget);

@@ -100,8 +100,8 @@ private:
         
         // Header with title and close button
         auto headerLayout = new QHBoxLayout();
-        headerLayout->setContentsMargins(12, 12, 12, 12);
-        headerLayout->setSpacing(8);
+        headerLayout->setContentsMargins(12, 8, 12, 8);
+        headerLayout->setSpacing(0);
         
         // Add AI Chat title with icon
         titleLabel = new QLabel("AI Assistant", this);

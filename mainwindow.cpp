@@ -14,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
     // Create central widget and main layout
     _centralWidget = new QWidget(this);
     _centralWidget->setStyleSheet(QString("background-color: #%1;")
-                                .arg(mg::theme::Colors::BACKGROUND, 6, 16, QChar('0')));
+                                .arg(mg::theme::Colors::SIDEBAR_BG, 6, 16, QChar('0')));
     
     _mainLayout = new QHBoxLayout(_centralWidget);
     _mainLayout->setContentsMargins(0, 0, 0, 0);
