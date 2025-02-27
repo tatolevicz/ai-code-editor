@@ -28,6 +28,7 @@ public:
 private:
     void setupActions();
     void setupTerminal();
+    void registerAICallbacks();
     
 private slots:
     void handleAIPrompt(const QString& prompt);

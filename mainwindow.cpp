@@ -58,6 +58,198 @@ MainWindow::MainWindow(QWidget *parent)
     
     // Inicializa o AgentProcessor com este MainWindow como CommandExecutor
     _agentProcessor = new ais::AgentProcessor(this);
+    
+    // Registra os callbacks para o processador de ações da IA
+    registerAICallbacks();
+}
+
+void MainWindow::registerAICallbacks()
+{
+    // Registrar callback para execução de comandos no terminal
+    _agentProcessor->registerActionCallback("run_command", [this](const mgutils::JsonDocument& doc) {
+        if(doc.HasMember("command")) {
+            std::string command = doc["command"].GetString();
+            std::vector<std::string> arguments;
+            if(doc.HasMember("arguments") && doc["arguments"].IsArray()) {
+                auto& args = doc["arguments"];
+                for (rapidjson::SizeType i = 0; i < args.Size(); i++) {
+                    arguments.push_back(args[i].GetString());
+                }
+            }
+            
+            // Construir comando completo
+            std::string fullCommand = command;
+            for (const auto &arg : arguments) {
+              fullCommand += " " + arg;
+            }
+            
+            // Executar o comando no terminal
+            this->executeTerminalCommand(fullCommand);
+        }
+    });
+    
+    // Registrar callback para escrita em arquivos
+    _agentProcessor->registerActionCallback("write_file", [](const mgutils::JsonDocument& doc) {
+        if(doc.HasMember("file") && doc.HasMember("content")) {
+            std::string filePath = doc["file"].GetString();
+            std::string content = doc["content"].GetString();
+            try {
+                mgutils::Files::writeFile(filePath, content);
+                logW << "Arquivo criado com sucesso: " << filePath;
+            } catch (...) {
+                logE << "Erro ao escrever arquivo: " << filePath;
+            }
+        }
+    });
+    
+    // Registrar callback para criação de diretórios
+    _agentProcessor->registerActionCallback("make_dir", [](const mgutils::JsonDocument& doc) {
+        if(doc.HasMember("relative_path")) {
+            std::string relativePath = doc["relative_path"].GetString();
+            try {
+                mgutils::Files::createDirectory(relativePath);
+                logW << "Diretório criado com sucesso: " << relativePath;
+            } catch (...) {
+                logE << "Erro ao criar diretório: " << relativePath;
+            }
+        }
+    });
+    
+    // Registrar callback para visualização de arquivos
+    _agentProcessor->registerActionCallback("view_file", [](const mgutils::JsonDocument& doc) {
+        if(doc.HasMember("file")) {
+            std::string filePath = doc["file"].GetString();
+            try {
+                std::string content = mgutils::Files::readFile(filePath);
+                logI << "Conteúdo do arquivo " << filePath << ":\n" << content;
+            } catch (...) {
+                logE << "Erro ao visualizar arquivo: " << filePath;
+            }
+        }
+    });
+    
+    // Registrar callback para edição de arquivos
+    _agentProcessor->registerActionCallback("edit_file", [](const mgutils::JsonDocument& doc) {
+        if(doc.HasMember("file") && doc.HasMember("changes")) {
+            std::string filePath = doc["file"].GetString();
+            std::string changes = doc["changes"].GetString();
+            try {
+                if(!mgutils::Files::fileExists(filePath))
+                    mgutils::Files::createFile(filePath);
+                mgutils::Files::writeFile(filePath, changes);
+                logW << "Arquivo editado com sucesso: " << filePath;
+            } catch (...) {
+                logE << "Erro ao editar arquivo: " << filePath;
+            }
+        }
+    });
+    
+    // Registrar callback para busca de arquivos
+    _agentProcessor->registerActionCallback("find", [](const mgutils::JsonDocument& doc) {
+        if(doc.HasMember("pattern")) {
+            std::string pattern = doc["pattern"].GetString();
+            std::string directory = ".";
+            if(doc.HasMember("directory")) {
+                directory = doc["directory"].GetString();
+            }
+            logW << "Buscando arquivos com padrão " << pattern << " em " << directory;
+            // Implementar busca usando mgutils::Files ou outra biblioteca
+        }
+    });
+    
+    // Registrar callback para grep search
+    _agentProcessor->registerActionCallback("grep_search", [](const mgutils::JsonDocument& doc) {
+        if(doc.HasMember("pattern") && doc.HasMember("file")) {
+            std::string pattern = doc["pattern"].GetString();
+            std::string file = doc["file"].GetString();
+            try {
+                std::string content = mgutils::Files::readFile(file);
+                std::stringstream ss(content);
+                std::string line;
+                int lineNumber = 0;
+                logW << "Resultados da busca por '" << pattern << "' em " << file << ":";
+                std::regex patternRegex(pattern);
+                while (std::getline(ss, line)) {
+                    lineNumber++;
+                    if (std::regex_search(line, patternRegex)) {
+                        logI << file << ":" << lineNumber << ": " << line;
+                    }
+                }
+            } catch (...) {
+                logE << "Erro ao realizar busca grep: " << pattern << " em " << file;
+            }
+        }
+    });
+    
+    // Registrar callback para listar diretórios
+    _agentProcessor->registerActionCallback("list_directory", [](const mgutils::JsonDocument& doc) {
+        if(doc.HasMember("directory")) {
+            std::string directory = doc["directory"].GetString();
+            logW << "Listando conteúdo do diretório: " << directory;
+            // Implementar listagem de diretórios usando mgutils::Files ou outra biblioteca
+        }
+    });
+    
+    // Registrar callback para ler conteúdo de URL
+    _agentProcessor->registerActionCallback("read_url_content", [](const mgutils::JsonDocument& doc) {
+        if(doc.HasMember("url")) {
+            std::string url = doc["url"].GetString();
+            logW << "Lendo conteúdo da URL: " << url;
+            // Aqui seria implementada a lógica para fazer requisição HTTP
+        }
+    });
+    
+    // Registrar callback para busca na web
+    _agentProcessor->registerActionCallback("search_web", [](const mgutils::JsonDocument& doc) {
+        if(doc.HasMember("query")) {
+            std::string query = doc["query"].GetString();
+            std::string domain = "";
+            if(doc.HasMember("domain")) {
+                domain = doc["domain"].GetString();
+            }
+            logW << "Realizando busca na web por: " << query;
+            if (!domain.empty()) {
+                logW << "Domínio: " << domain;
+            }
+            // Aqui seria implementada a lógica para realizar a busca na web
+        }
+    });
+    
+    // Registrar callback para visualizar item de código
+    _agentProcessor->registerActionCallback("view_code_item", [](const mgutils::JsonDocument& doc) {
+        if(doc.HasMember("file") && doc.HasMember("identifier")) {
+            std::string file = doc["file"].GetString();
+            std::string identifier = doc["identifier"].GetString();
+            logW << "Visualizando definição de " << identifier << " em " << file;
+            // Aqui seria implementada a lógica para extrair e exibir a definição do item de código
+        }
+    });
+    
+    // Registrar callback para visualizar chunk de documento web
+    _agentProcessor->registerActionCallback("view_web_document_content_chunk", [](const mgutils::JsonDocument& doc) {
+        if(doc.HasMember("url") && doc.HasMember("chunk")) {
+            std::string url = doc["url"].GetString();
+            int chunk = doc["chunk"].GetInt();
+            logI << "Visualizando chunk " << chunk << " do documento em " << url;
+            // Aqui seria implementada a lógica para recuperar e exibir o chunk específico
+        }
+    });
+    
+    // Registrar callback para busca na base de código
+    _agentProcessor->registerActionCallback("codebase_search", [](const mgutils::JsonDocument& doc) {
+        if(doc.HasMember("query")) {
+            std::string query = doc["query"].GetString();
+            std::string corpus = "";
+            if(doc.HasMember("corpus")) {
+                corpus = doc["corpus"].GetString();
+            }
+            logW << "Realizando busca na base de código por: " << query;
+            if (!corpus.empty()) {
+                logW << "Corpus: " << corpus;
+            }
+            // Aqui seria implementada a lógica para realizar a busca semântica na base de código
+        }
+    });
 }
 
 void MainWindow::setupTerminal()
