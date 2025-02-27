@@ -43,8 +43,11 @@ MainWindow::MainWindow(QWidget *parent)
     // Add editor layout to main layout
     _mainLayout->addLayout(_editorLayout, 1);
     
+    // Inicializa o AgentProcessor com este MainWindow como CommandExecutor
+    _agentProcessor = std::make_shared<ais::AgentProcessor>(this);
+    
     // Create and setup AI chat widget
-    _aiChat = new AIChatWidget(_centralWidget, this);
+    _aiChat = new AIChatWidget(_centralWidget, this, _agentProcessor);
     _mainLayout->addWidget(_aiChat);
     
     // Connect signals
@@ -55,9 +58,6 @@ MainWindow::MainWindow(QWidget *parent)
     
     // Setup actions and shortcuts
     setupActions();
-    
-    // Inicializa o AgentProcessor com este MainWindow como CommandExecutor
-    _agentProcessor = new ais::AgentProcessor(this);
     
     // Registra os callbacks para o processador de ações da IA
     registerAICallbacks();
@@ -407,7 +407,6 @@ void MainWindow::handleFileSelected(const QString& filePath)
 MainWindow::~MainWindow()
 {
     delete ui;
-    delete _agentProcessor; // Liberar a memória do AgentProcessor
 }
 
 void MainWindow::handleAIPrompt(const QString& prompt)

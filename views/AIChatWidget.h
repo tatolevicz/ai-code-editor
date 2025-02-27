@@ -25,9 +25,11 @@ class AIChatWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit AIChatWidget(QWidget *parent = nullptr, ais::CommandExecutor* executor = nullptr) : QWidget(parent),
+    explicit AIChatWidget(QWidget *parent = nullptr, 
+                         ais::CommandExecutor* executor = nullptr,
+                         std::shared_ptr<ais::AgentProcessor> processor = nullptr) : QWidget(parent),
         _streamer(std::make_shared<ais::AIStreamer>()),
-        _processor(std::make_shared<ais::AgentProcessor>(executor)),
+        _processor(processor ? processor : std::make_shared<ais::AgentProcessor>(executor)),
         _agent(std::make_shared<ais::AIAgent>(ais::agents::cascade))
     {
         setFixedWidth(400);

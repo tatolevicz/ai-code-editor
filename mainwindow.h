@@ -49,6 +49,6 @@ private:
     QAction* _toggleAIChatAction{nullptr};
     QAction* _toggleFileExplorerAction{nullptr};
     QAction* _toggleTerminalAction{nullptr};
-    ais::AgentProcessor* _agentProcessor{nullptr};
+    std::shared_ptr<ais::AgentProcessor> _agentProcessor{nullptr};
 };
 #endif // MAINWINDOW_H
