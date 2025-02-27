@@ -106,7 +106,7 @@ void MainWindow::setupTerminal()
         "  background-color: transparent;"
         "}"
     ).arg(
-        QString::number(mg::theme::Colors::BLACK, 16).rightJustified(6, '0'),
+        QString::number(mg::theme::Colors::TERMINAL_BG, 16).rightJustified(6, '0'),
         QString::number(mg::theme::Colors::DEFAULT_TEXT, 16).rightJustified(6, '0'),
         QString::number(mg::theme::Colors::BORDER, 16).rightJustified(6, '0')
     );
