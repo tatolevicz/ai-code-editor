@@ -74,26 +74,36 @@ void MainWindow::setupTerminal()
     
     // Customizar cores e aparência do terminal
     // Usar um esquema de cores que combina com o tema Magia
-    _terminal->setColorScheme("Ubuntu"); // Ubuntu tem cores roxas/azuis escuras
-    
+    _terminal->setColorScheme("Linux"); // Ubuntu tem cores roxas/azuis escuras
+
     // Configurar a opacidade do terminal para um efeito mais moderno
-    _terminal->setTerminalOpacity(0.95);
+    _terminal->setTerminalOpacity(1.0); // Opacidade completa
     
     // Limpar qualquer imagem de fundo
     _terminal->setTerminalBackgroundImage("");
     
     // Modo de fundo - usar valor numérico já que o enum não está acessível
     // Valores comuns para TerminalBackgroundMode: 0=None, 1=Stretch, 2=Tile, 3=Center, 4=Transparent
-    _terminal->setTerminalBackgroundMode(4); // Modo transparente
+    _terminal->setTerminalBackgroundMode(0); // Modo normal sem transparência
     
     // Aplicar estilo CSS para complementar a aparência do terminal
-    // Isso afeta o widget de contêiner, não o terminal em si
+    // Isso afeta o widget de contêiner e seus elementos internos
     QString terminalStyle = QString(
         "QWidget {"
         "  background-color: #%1;"
         "  color: #%2;"
         "  border: 1px solid #%3;"
         "  border-radius: 4px;"
+        "}"
+        // Remover background de labels e elementos de texto
+        "QLabel, QTextEdit, QLineEdit, QPlainTextEdit {"
+        "  background: transparent;"
+        "  background-color: transparent;"
+        "  border: none;"
+        "}"
+        // Para ter certeza que elementos internos são transparentes
+        "QTermWidget > * {"
+        "  background-color: transparent;"
         "}"
     ).arg(
         QString::number(mg::theme::Colors::BLACK, 16).rightJustified(6, '0'),
@@ -107,7 +117,7 @@ void MainWindow::setupTerminal()
     _terminal->setMargin(4);
     
     // Usar uma fonte consistente com o restante do editor
-    _terminal->setTerminalFont(QFont("JetBrains Mono", 10)); 
+    _terminal->setTerminalFont(QFont("JetBrains Mono", 14));
     _terminal->setScrollBarPosition(QTermWidget::ScrollBarRight);
     _terminal->setWorkingDirectory(QDir::currentPath());
     
