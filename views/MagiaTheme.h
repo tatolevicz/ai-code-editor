@@ -10,7 +10,8 @@ struct Colors {
     inline static int CODE_BG = 0x181830;            // #181830 - Darkest blue-purple (for code area)
     inline static int BACKGROUND = 0x1E1E3F;         // #1E1E3F - Dark blue-purple background
     inline static int SIDEBAR_BG = 0x2D2B55;         // #2D2B55 - Sidebar background
-    inline static int ACTIVE_ITEM = 0x433C7E;        // #433C7E - Active/selected items 
+    inline static int BLACK = 0x222222;         // #2D2B55 - Sidebar background
+    inline static int ACTIVE_ITEM = 0x433C7E;        // #433C7E - Active/selected items
     inline static int PRIMARY = 0x7E57C2;            // #7E57C2 - Primary purple
     inline static int SECONDARY = 0x433C7E;          // #433C7E - Medium purple (same as active)
     inline static int BORDER = 0x433C7E;             // #433C7E - Border color

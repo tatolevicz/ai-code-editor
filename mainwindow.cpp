@@ -72,8 +72,39 @@ void MainWindow::setupTerminal()
     environment << "TERM=xterm-256color";
     _terminal->setEnvironment(environment);
     
-    // Testar com esquema "Ubuntu" que tem tons roxos/azuis escuros
-    _terminal->setColorScheme("Ubuntu");
+    // Customizar cores e aparência do terminal
+    // Usar um esquema de cores que combina com o tema Magia
+    _terminal->setColorScheme("Ubuntu"); // Ubuntu tem cores roxas/azuis escuras
+    
+    // Configurar a opacidade do terminal para um efeito mais moderno
+    _terminal->setTerminalOpacity(0.95);
+    
+    // Limpar qualquer imagem de fundo
+    _terminal->setTerminalBackgroundImage("");
+    
+    // Modo de fundo - usar valor numérico já que o enum não está acessível
+    // Valores comuns para TerminalBackgroundMode: 0=None, 1=Stretch, 2=Tile, 3=Center, 4=Transparent
+    _terminal->setTerminalBackgroundMode(4); // Modo transparente
+    
+    // Aplicar estilo CSS para complementar a aparência do terminal
+    // Isso afeta o widget de contêiner, não o terminal em si
+    QString terminalStyle = QString(
+        "QWidget {"
+        "  background-color: #%1;"
+        "  color: #%2;"
+        "  border: 1px solid #%3;"
+        "  border-radius: 4px;"
+        "}"
+    ).arg(
+        QString::number(mg::theme::Colors::BLACK, 16).rightJustified(6, '0'),
+        QString::number(mg::theme::Colors::DEFAULT_TEXT, 16).rightJustified(6, '0'),
+        QString::number(mg::theme::Colors::BORDER, 16).rightJustified(6, '0')
+    );
+    
+    _terminal->setStyleSheet(terminalStyle);
+    
+    // Configurar margens para dar um espaçamento elegante
+    _terminal->setMargin(4);
     
     // Usar uma fonte consistente com o restante do editor
     _terminal->setTerminalFont(QFont("JetBrains Mono", 10)); 
@@ -83,6 +114,12 @@ void MainWindow::setupTerminal()
     // Enable flow control and other terminal features
     _terminal->setFlowControlEnabled(true);
     _terminal->setFlowControlWarningEnabled(true);
+    
+    // Melhorar a aparência dos caracteres de linha
+    _terminal->setDrawLineChars(true);
+    
+    // Texto em negrito também mais intenso
+    _terminal->setBoldIntense(true);
     
     // Enable context menu
     _terminal->setContextMenuPolicy(Qt::CustomContextMenu);
