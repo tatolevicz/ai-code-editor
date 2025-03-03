@@ -30,7 +30,7 @@ public:
                          std::shared_ptr<ais::AgentProcessor> processor = nullptr) : QWidget(parent),
         _streamer(std::make_shared<ais::AIStreamer>()),
         _processor(processor ? processor : std::make_shared<ais::AgentProcessor>(executor)),
-        _agent(std::make_shared<ais::AIAgent>(ais::agents::cascade))
+        _agent(std::make_shared<ais::AIAgent>(ais::agents::cascadeV2))
     {
         setFixedWidth(400);
         setupUI();
@@ -46,6 +46,21 @@ public:
         _streamer->call(*_agent);
     }
 
+  std::shared_ptr<ais::AIAgent> getAgent()
+  {
+    return _agent;
+  }
+
+  void updateAgent()
+  {
+    if(!_isProcessing)
+    {
+      _streamer->call(*_agent);
+      return;
+    }
+
+    logW << "Agent is processing already. Call not sent.";
+  }
 private:
     QTextEdit *responseArea;
     QLineEdit *promptInput;
@@ -98,6 +113,7 @@ private:
         });
         _processingTimer.start();
     }
+
 
     void setupUI()
     {

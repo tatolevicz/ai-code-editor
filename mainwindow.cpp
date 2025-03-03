@@ -89,13 +89,17 @@ void MainWindow::registerAICallbacks()
     });
     
     // Registrar callback para escrita em arquivos
-    _agentProcessor->registerActionCallback("write_file", [](const mgutils::JsonDocument& doc) {
+    _agentProcessor->registerActionCallback("write_file", [&](const mgutils::JsonDocument& doc) {
         if(doc.HasMember("file") && doc.HasMember("content")) {
             std::string filePath = doc["file"].GetString();
             std::string content = doc["content"].GetString();
             try {
                 mgutils::Files::writeFile(filePath, content);
-                logW << "Arquivo criado com sucesso: " << filePath;
+              std::stringstream ss;
+              ss <<  "Arquivo criado com sucesso: " << filePath;
+              logW << ss.str();
+              _aiChat->getAgent()->addObservation(ss.str());
+              _aiChat->updateAgent();
             } catch (...) {
                 logE << "Erro ao escrever arquivo: " << filePath;
             }
@@ -103,12 +107,17 @@ void MainWindow::registerAICallbacks()
     });
     
     // Registrar callback para criação de diretórios
-    _agentProcessor->registerActionCallback("make_dir", [](const mgutils::JsonDocument& doc) {
-        if(doc.HasMember("relative_path")) {
+    _agentProcessor->registerActionCallback("make_dir", [&](const mgutils::JsonDocument& doc) {
+        if(doc.HasMember("relative_path"))
+        {
             std::string relativePath = doc["relative_path"].GetString();
-            try {
-                mgutils::Files::createDirectory(relativePath);
-                logW << "Diretório criado com sucesso: " << relativePath;
+            try{
+              mgutils::Files::createDirectory(relativePath);
+              std::stringstream ss;
+              ss <<  "Diretório criado com sucesso: " << relativePath;
+              logW << ss.str();
+              _aiChat->getAgent()->addObservation(ss.str());
+              _aiChat->updateAgent();
             } catch (...) {
                 logE << "Erro ao criar diretório: " << relativePath;
             }
@@ -442,7 +451,7 @@ void MainWindow::executeBashCommand(const std::string &command)
        message = "Command error (" + QString::number(exitCode) + "):\n```\n" + errorOutput + "\n```";
     }
   }
-  _aiChat->appendTerminalOutput(message);
+//  _aiChat->appendTerminalOutput(message);
   qDebug() << "Terminal: " + message;
 }
 // Modifique o método de execução para incluir o marcador
