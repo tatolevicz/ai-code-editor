@@ -133,30 +133,46 @@ void MainWindow::registerAICallbacks()
     });
     
     // Registrar callback para visualização de arquivos
-    _agentProcessor->registerActionCallback("view_file", [](const mgutils::JsonDocument& doc) {
+    _agentProcessor->registerActionCallback("view_file", [&](const mgutils::JsonDocument& doc) {
         if(doc.HasMember("file")) {
             std::string filePath = doc["file"].GetString();
             try {
-                std::string content = mgutils::Files::readFile(filePath);
-                logI << "Conteúdo do arquivo " << filePath << ":\n" << content;
+              std::string content = mgutils::Files::readFile(filePath);
+              std::stringstream ss;
+              ss <<  "<observation><action>view_file</action><result>Conteúdo do arquivo: " << filePath << "\ncontent:" << content << "</result></observation>";
+              logW << ss.str();
+              _aiChat->getAgent()->addObservation(ss.str());
+              _aiChat->updateAgent();
             } catch (...) {
-                logE << "Erro ao visualizar arquivo: " << filePath;
+              std::stringstream ss;
+              ss <<  "<observation><action>view_file</action><result>Erro ao visualizar arquivo: " << filePath << "</result></observation>";
+              logE << ss.str();
+              _aiChat->getAgent()->addObservation(ss.str());
+              _aiChat->updateAgent();
             }
         }
     });
     
     // Registrar callback para edição de arquivos
-    _agentProcessor->registerActionCallback("edit_file", [](const mgutils::JsonDocument& doc) {
+    _agentProcessor->registerActionCallback("edit_file", [&](const mgutils::JsonDocument& doc) {
         if(doc.HasMember("file") && doc.HasMember("changes")) {
             std::string filePath = doc["file"].GetString();
             std::string changes = doc["changes"].GetString();
             try {
                 if(!mgutils::Files::fileExists(filePath))
                     mgutils::Files::createFile(filePath);
-                mgutils::Files::writeFile(filePath, changes);
-                logW << "Arquivo editado com sucesso: " << filePath;
+              mgutils::Files::writeFile(filePath, changes);
+              std::stringstream ss;
+              ss <<  "<observation><action>edit_file</action><result>Arquivo "<< filePath << " criado com sucesso.</result></observation>";
+              logW << ss.str();
+              _aiChat->getAgent()->addObservation(ss.str());
+              _aiChat->updateAgent();
             } catch (...) {
-                logE << "Erro ao editar arquivo: " << filePath;
+              std::stringstream ss;
+              ss <<  "<observation><action>edit_file</action><result>Erro ao editar arquivo: " << filePath << ".</result></observation>";
+              logE << ss.str();
+              _aiChat->getAgent()->addObservation(ss.str());
+              _aiChat->updateAgent();
             }
         }
     });
@@ -199,11 +215,31 @@ void MainWindow::registerAICallbacks()
     });
     
     // Registrar callback para listar diretórios
-    _agentProcessor->registerActionCallback("list_directory", [](const mgutils::JsonDocument& doc) {
+    _agentProcessor->registerActionCallback("list_directory", [&](const mgutils::JsonDocument& doc) {
         if(doc.HasMember("directory")) {
             std::string directory = doc["directory"].GetString();
-            logW << "Listando conteúdo do diretório: " << directory;
-            // Implementar listagem de diretórios usando mgutils::Files ou outra biblioteca
+            auto files = mgutils::Files::listDirectories(directory);
+            if(!files.empty())
+            {
+              std::string fileList;
+              for(auto &f : files)
+                fileList += f + "\n";
+
+              std::stringstream ss;
+              ss <<  "<observation><action>list_directory</action><result>Conteúdo do diretório: " << directory << "\ncontent:" << fileList << "</result></observation>";
+              logW << ss.str();
+              _aiChat->getAgent()->addObservation(ss.str());
+              _aiChat->updateAgent();
+            }
+            else
+            {
+              std::stringstream ss;
+              ss <<  "<observation><action>list_directory</action><result>O diretório: " << directory << " está vazio.</result></observation>";
+              logW << ss.str();
+              _aiChat->getAgent()->addObservation(ss.str());
+              _aiChat->updateAgent();
+            }
+
         }
     });
     
@@ -459,7 +495,7 @@ void MainWindow::executeBashCommand(const std::string &command)
        message = "Command error (" + QString::number(exitCode) + "):\n```\n" + errorOutput + "\n```";
     }
   }
-//  _aiChat->appendTerminalOutput(message);
+  _aiChat->getAgent()->addObservation(message.toStdString());
   qDebug() << "Terminal: " + message;
 }
 // Modifique o método de execução para incluir o marcador
