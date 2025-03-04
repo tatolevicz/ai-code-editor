@@ -94,32 +94,40 @@ void MainWindow::registerAICallbacks()
             std::string filePath = doc["file"].GetString();
             std::string content = doc["content"].GetString();
             try {
-                mgutils::Files::writeFile(filePath, content);
+              mgutils::Files::writeFile(filePath, content);
               std::stringstream ss;
-              ss <<  "Arquivo criado com sucesso: " << filePath;
+              ss <<  "<observation><action>write_file</action><result>Arquivo "<< filePath << " criado com sucesso.</result></observation>";
               logW << ss.str();
               _aiChat->getAgent()->addObservation(ss.str());
               _aiChat->updateAgent();
             } catch (...) {
-                logE << "Erro ao escrever arquivo: " << filePath;
+              std::stringstream ss;
+              ss <<  "<observation><action>write_file</action><result>Erro ao escrever arquivo: " << filePath << ".</result></observation>";
+              logE << ss.str();
+              _aiChat->getAgent()->addObservation(ss.str());
+              _aiChat->updateAgent();
             }
         }
     });
     
     // Registrar callback para criação de diretórios
     _agentProcessor->registerActionCallback("make_dir", [&](const mgutils::JsonDocument& doc) {
-        if(doc.HasMember("relative_path"))
+        if(doc.HasMember("directory"))
         {
-            std::string relativePath = doc["relative_path"].GetString();
+            std::string relativePath = doc["directory"].GetString();
             try{
               mgutils::Files::createDirectory(relativePath);
               std::stringstream ss;
-              ss <<  "Diretório criado com sucesso: " << relativePath;
+              ss <<  "<observation><action>write_file</action><result>Diretório criado com sucesso: " << relativePath << "</result></observation>";
               logW << ss.str();
               _aiChat->getAgent()->addObservation(ss.str());
               _aiChat->updateAgent();
             } catch (...) {
-                logE << "Erro ao criar diretório: " << relativePath;
+              std::stringstream ss;
+              ss <<  "<observation><action>write_file</action><result>Erro ao criar diretório: " << relativePath << "</result></observation>";
+              logE << ss.str();
+              _aiChat->getAgent()->addObservation(ss.str());
+              _aiChat->updateAgent();
             }
         }
     });
@@ -354,7 +362,7 @@ void MainWindow::setupTerminal()
     });
     
     // Conectar o sinal receivedData para capturar a saída do terminal
-    connect(_terminal, &QTermWidget::receivedData, this, &MainWindow::handleTerminalOutput);
+//    connect(_terminal, &QTermWidget::receivedData, this, &MainWindow::handleTerminalOutput);
     
     // Start the shell
     _terminal->startShellProgram();
